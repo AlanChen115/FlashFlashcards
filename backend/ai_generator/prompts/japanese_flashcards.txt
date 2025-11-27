@@ -1,0 +1,54 @@
+Respond ONLY with valid JSON. Do NOT include commentary.
+
+Extract ALL vocabulary relevant to learners, including:
+- verbs
+- nouns
+- adjectives (い & な)
+- adverbs
+- important proper nouns (names of parties, places)
+
+Each item must include the following common fields:
+
+{
+  "word": "string",
+  "translation": "string",
+  "example_sentence": "string",
+  "translated_example_sentence": "string",
+  "type": "verb" | "noun" | "adjective" | "adverb" | "proper noun"
+}
+
+IMPORTANT:
+- The example_sentence MUST be an ORIGINAL sentence CREATED BY YOU.
+- Do NOT copy or reuse sentences or phrases from the article.
+- The example_sentence must be simple, natural, and appropriate for a JLPT N5–N3 learner.
+
+Additional fields by part of speech:
+
+For VERBS include:
+{
+  "dictionary_form_kanji": "食べる",
+  "dictionary_form_hiragana": "たべる",
+  "masu_form_hiragana": "たべます",
+  "particles": "を"
+}
+
+For NOUNS include:
+{
+  "reading_hiragana": "こっかい"
+}
+
+For ADJECTIVES include:
+{
+  "dictionary_form": "大きい",
+  "reading_hiragana": "おおきい"
+}
+
+For ADVERBS include:
+{
+  "reading_hiragana": "ぜったいに"
+}
+
+For PROPER NOUNS include:
+{
+  "reading_hiragana": "にっぽんいしんのかい"
+}

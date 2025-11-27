@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .utils import parse_article
 
-# Create your views here.
+# sends a json with text and generates data for the flashcards
 @api_view(['POST'])
 def parse(request):
     text = request.data.get('body_text')
@@ -14,6 +14,6 @@ def parse(request):
     return Response(data)
 
 @api_view(['POST'])
-def generate(request):
+def batch_parse(request):
     pass
 
