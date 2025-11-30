@@ -10,3 +10,7 @@ def scrape(request):
         return Response({"error": "No URL provided"}, status=400)
     data = scrape_article(url)
     return Response(data)
+#add this functionality later after finishing everything else
+@api_view(['POST'])
+def batch_scrape(request):
+    pass

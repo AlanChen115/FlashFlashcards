@@ -31,3 +31,6 @@ staticfiles/
 # OS
 .DS_Store
 Thumbs.db
+
+# test_pipeline.py
+test_pipeline.py

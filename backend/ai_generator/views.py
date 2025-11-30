@@ -10,6 +10,7 @@ def parse(request):
     if not text:
         return Response({"error": "No text provided"}, status=400)
     data = parse_article(text, language)
+
     print(data)
     return Response(data)
 
