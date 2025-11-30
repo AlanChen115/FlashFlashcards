@@ -1,3 +1,4 @@
+import io
 import genanki
 import hashlib
 
@@ -22,12 +23,25 @@ def export_anki(flashcards):
     for flashcard in flashcards:
         my_deck.add_note(genanki.Note(
             model=my_model,
-            fields=[flashcard['front'], flashcard['back']],
+            fields=[flashcard.get("front", ""), flashcard.get("back", "")],
         ))
         
     genanki.Package(my_deck).write_to_file('output.apkg')
-
     return {"status": "Anki deck exported successfully"}
 
-def export_quizlet():
-    pass
+    # Uncomment below to return as bytes instead of writing to file
+    # buffer = io.BytesIO()
+    # genanki.Package(my_deck).write_to_file(buffer)
+
+    # return buffer.getvalue()
+
+
+def export_quizlet(flashcards):
+    lines = []
+    
+    for flashcard in flashcards:
+        lines.append(f"{flashcard.get('front', '')}\t{flashcard.get('back', '')}")
+
+    output = "\n".join(lines)
+
+    return output
