@@ -12,16 +12,16 @@ def anki(request):
     if not flashcards:
         return Response({"error": "No flashcards provided"}, status=400)
     data = export_anki(flashcards)
-    return Response(data)
+    # return Response(data)
 
     # Uncomment below to return as a downloadable file
-    # response = HttpResponse(
-    #     buffer.getvalue(),
-    #     content_type="application/octet-stream"
-    # )
-    # response['Content-Disposition'] = 'attachment; filename="flashcards.apkg"'
+    response = HttpResponse(
+        data.getvalue(),
+        content_type="application/octet-stream"
+    )
+    response['Content-Disposition'] = 'attachment; filename="flashcards.apkg"'
 
-    # return response
+    return response
 
 #add this functionality later after finishing everything else
 @api_view(['POST'])

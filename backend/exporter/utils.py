@@ -26,14 +26,14 @@ def export_anki(flashcards):
             fields=[flashcard.get("front", ""), flashcard.get("back", "")],
         ))
         
-    genanki.Package(my_deck).write_to_file('output.apkg')
-    return {"status": "Anki deck exported successfully"}
+    # genanki.Package(my_deck).write_to_file('output.apkg')
+    # return {"status": "Anki deck exported successfully"}
 
     # Uncomment below to return as bytes instead of writing to file
-    # buffer = io.BytesIO()
-    # genanki.Package(my_deck).write_to_file(buffer)
+    buffer = io.BytesIO()
+    genanki.Package(my_deck).write_to_file(buffer)
 
-    # return buffer.getvalue()
+    return buffer
 
 
 def export_quizlet(flashcards):
