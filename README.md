@@ -13,7 +13,7 @@ At its current stage, the project intentionally prioritizes **backend correctnes
 * ✅ AI-driven flashcard generation (prompt-based)
 * ✅ Local pipeline testing via script
 * 🚧 Export layer (partial, extensible)
-* 🚧 Frontend UI (not started)
+* 🚧 Frontend UI (basic UI)
 * 🚧 Authentication, persistence, and user management (planned)
 
 This README documents **what is currently implemented**, with clearly marked limitations.
@@ -31,8 +31,7 @@ This README documents **what is currently implemented**, with clearly marked lim
 
 ### Frontend
 
-* Not implemented
-* `frontend/` directory exists as a placeholder only
+* React
 
 ---
 
@@ -78,7 +77,7 @@ FlashFlashcards/
 │       ├── utils.py            # Export helpers
 │       └── models.py           # Placeholder / future expansion
 │
-├── frontend/                   # Placeholder (no UI yet)
+├── frontend/                   # Basic react frontend
 └── README.md
 ```
 
@@ -193,8 +192,28 @@ http://127.0.0.1:8000/
 
 [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
 
+```
+
+Frontend Setup (Vite)
+1. Install frontend dependencies
+
+```bash
+cd frontend
+npm install
+```
+
+2. Start the development server
+```
+npm run dev
+```
+
+Frontend will be available at:
+```
+http://localhost:5173/
 ````
 
+The frontend communicates with the Django backend via HTTP APIs.
+CORS configuration may be required depending on your setup.
 ---
 
 ## Testing the Pipeline
@@ -246,3 +265,4 @@ MIT License
 ## Author
 
 Alan Chen
+
