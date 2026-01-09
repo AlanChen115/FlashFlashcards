@@ -6,7 +6,7 @@ from .utils import parse_article
 @api_view(['POST'])
 def parse(request):
     text = request.data.get('body_text')
-    language = "Japanese"
+    language = request.data.get('language')
     if not text:
         return Response({"error": "No text provided"}, status=400)
     data = parse_article(text, language)

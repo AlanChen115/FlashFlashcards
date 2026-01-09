@@ -22,6 +22,9 @@ async function postJSON(url, body) {
 
 function LinkField( {onGenerate} ) {
   const [link, setLink] = useState('')
+  const [language, setLanguage] = useState('');
+
+  const languageOptions = [{value :'Japanese', label: 'Japanese'}];
 
   function handleChange(event) {
     setLink(event.target.value)
@@ -35,7 +38,7 @@ function LinkField( {onGenerate} ) {
 
       const scraped_data = response;
       const response2 = await postJSON('/api/ai_generator/parse/', {
-        body_text: scraped_data.body_text, language: 'Japanese'
+        body_text: scraped_data.body_text, language: language
       });
       console.log("Generated flashcards:", response2);
       onGenerate(response2.output.flashcards);
@@ -46,6 +49,14 @@ function LinkField( {onGenerate} ) {
 
   return (
     <form onSubmit={handleSubmit}>
+      <label>Select Language:</label>
+      <select value={language} onChange={(e) => setLanguage(e.target.value)}>
+        {languageOptions.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
       <input type="text" value={link} onChange={handleChange} placeholder="Enter link"/>
       <button type="submit">Submit</button>
     </form>
@@ -56,6 +67,7 @@ function LinkField( {onGenerate} ) {
 
 function App() { 
   const [flashcards, setFlashcards] = useState([]);
+  const [exportFormat, setExportFormat] = useState('');
 
   const handleGenerate = (generatedFlashcards) => {
     setFlashcards(generatedFlashcards);
@@ -65,7 +77,7 @@ const handleDownload = async () => {
   if (!flashcards.length) return alert("No flashcards to download!");
 
   try {
-    const response = await fetch("/api/exporter/anki/", {
+    const response = await fetch("/api/exporter/"+ exportFormat + "/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ flashcards }),
@@ -92,6 +104,10 @@ const handleDownload = async () => {
     <div>
       <LinkField onGenerate={handleGenerate} />
       <button onClick={handleDownload}>Download</button>
+      <select value={exportFormat} onChange={(e) => setExportFormat(e.target.value)}>
+        <option value="anki">Anki (.apkg)</option>
+        <option value="quizlet">Quizlet (.csv)</option>
+      </select>
     </div>
   );
 }
