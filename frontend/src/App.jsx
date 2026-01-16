@@ -22,7 +22,7 @@ async function postJSON(url, body) {
 
 function LinkField( {onGenerate} ) {
   const [link, setLink] = useState('')
-  const [language, setLanguage] = useState('');
+  const [language, setLanguage] = useState('Japanese');
 
   const languageOptions = [{value :'Japanese', label: 'Japanese'}];
 
@@ -63,7 +63,31 @@ function LinkField( {onGenerate} ) {
   );
 }
 
-
+function Flashcards({flashcards, setFlashcards}) {
+  const handleChange = (index, field, value) => {
+    const updatedFlashcards = [...flashcards];
+    updatedFlashcards[index][field] = value;
+    setFlashcards(updatedFlashcards);
+  }
+  return (
+    <div className="flashcards-container">
+      {flashcards.map((card, index) => (
+        <div key={index} className="flashcard">
+          <input
+            type="text"
+            value={card.front}
+            onChange={(e) => handleChange(index, 'front', e.target.value)}
+          />
+          <input
+            type="text"
+            value={card.back}
+            onChange={(e) => handleChange(index, 'back', e.target.value)}
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
 
 function App() { 
   const [flashcards, setFlashcards] = useState([]);
@@ -103,6 +127,7 @@ const handleDownload = async () => {
   return (
     <div>
       <LinkField onGenerate={handleGenerate} />
+      {flashcards.length > 0 && Flashcards({flashcards, setFlashcards})}
       <button onClick={handleDownload}>Download</button>
       <select value={exportFormat} onChange={(e) => setExportFormat(e.target.value)}>
         <option value="anki">Anki (.apkg)</option>

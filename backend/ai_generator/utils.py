@@ -55,7 +55,7 @@ def process(response_content, language):
             example_sentence = item.get("example_sentence", "")
             translated_example_sentence = item.get("translated_example_sentence", "")
             if item.get("type") == "verb":
-                front = f"{translation}\n　ex:{translated_example_sentence}"
+                front = f"{translation}\n　ex: {translated_example_sentence}"
                 back = (
                     f"({item.get('particles', '')})"
                     f"{item.get('dictionary_form_kanji', '')}\n"
@@ -64,7 +64,7 @@ def process(response_content, language):
                     f"例：{example_sentence}"
                 )
             else:
-                front = f"{translation}\n　ex:{translated_example_sentence}"
+                front = f"{translation}\n　ex: {translated_example_sentence}"
                 back = f"{word}\n例：{example_sentence}"
         
             processed_content["flashcards"].append({

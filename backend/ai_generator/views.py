@@ -9,6 +9,8 @@ def parse(request):
     language = request.data.get('language')
     if not text:
         return Response({"error": "No text provided"}, status=400)
+    if not language:
+        return Response({"error": "No language provided"}, status=400)
     data = parse_article(text, language)
 
     print(data)
