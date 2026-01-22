@@ -83,8 +83,17 @@ function Flashcards({flashcards, setFlashcards}) {
             value={card.back}
             onChange={(e) => handleChange(index, 'back', e.target.value)}
           />
+          <button onClick={() => {
+            const updatedFlashcards = flashcards.filter((_, i) => i !== index);
+            setFlashcards(updatedFlashcards);
+          }}>Delete</button>
         </div>
       ))}
+      <button onClick={() => {
+        const updatedFlashcards = [...flashcards];
+        updatedFlashcards.push({ front: '', back: '' });
+        setFlashcards(updatedFlashcards);
+      }}>Add Flashcard</button>
     </div>
   );
 }
@@ -127,7 +136,7 @@ const handleDownload = async () => {
   return (
     <div>
       <LinkField onGenerate={handleGenerate} />
-      {flashcards.length > 0 && Flashcards({flashcards, setFlashcards})}
+      {Flashcards({flashcards, setFlashcards})}
       <button onClick={handleDownload}>Download</button>
       <select value={exportFormat} onChange={(e) => setExportFormat(e.target.value)}>
         <option value="anki">Anki (.apkg)</option>
