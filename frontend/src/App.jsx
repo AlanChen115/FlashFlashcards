@@ -21,25 +21,46 @@ async function postJSON(url, body) {
 }
 
 function LinkField( {onGenerate} ) {
-  const [link, setLink] = useState('')
+  const [links, setLinks] = useState([''])
   const [language, setLanguage] = useState('Japanese');
 
   const languageOptions = [{value :'Japanese', label: 'Japanese'}];
 
-  function handleChange(event) {
-    setLink(event.target.value)
+  function handleChange(event, index) {
+    const updatedLinks = [...links];
+    updatedLinks[index] = event.target.value;
+    setLinks(updatedLinks);
   }
 
   const handleSubmit = async (event) => {
     event.preventDefault()
     try {
-      const response = await postJSON('/api/scraper/scrape/', { url: link });
-      console.log("Scraped data:", response);
+      let response2;
+      if (links.length === 0) {
+        return alert("Please add at least one link.");
+      }
+      if (links.length === 1) {
+        const response = await postJSON('/api/scraper/scrape/', { url: links[0] });
+        console.log("Scraped data:", response);
 
-      const scraped_data = response;
-      const response2 = await postJSON('/api/ai_generator/parse/', {
-        body_text: scraped_data.body_text, language: language
-      });
+        const scraped_data = response;
+        response2 = await postJSON('/api/ai_generator/parse/', {
+          body_text: scraped_data.body_text, language: language
+        });
+      } else {
+        const response = await postJSON('/api/scraper/batch_scrape/', { urls: links });
+        console.log("Scraped data:", response);
+
+        const scraped_data = response;
+        const texts = [];
+        for (const website of scraped_data) {
+          texts.push(website.body_text);
+        } 
+
+        response2 = await postJSON('/api/ai_generator/batch_parse/', {
+          body_texts: texts, language: language
+        });
+      }
       console.log("Generated flashcards:", response2);
       onGenerate(response2.output.flashcards);
     } catch (err) {
@@ -57,7 +78,25 @@ function LinkField( {onGenerate} ) {
           </option>
         ))}
       </select>
-      <input type="text" value={link} onChange={handleChange} placeholder="Enter link"/>
+      {links.map((link, index) => (
+        <div key={index}>
+          <input
+            type="text"
+            value={link}
+            onChange={(e) => {
+              handleChange(e, index);
+            }}
+            placeholder="Enter link"
+          />
+          <button type="button" onClick={() => {
+            const updatedLinks = links.filter((_, i) => i !== index);
+            setLinks(updatedLinks);
+          }}>Delete</button>
+        </div>
+      ))}
+      <button type="button" onClick={() => {
+        setLinks([...links, '']);
+      }}>Add Link</button>
       <button type="submit">Submit</button>
     </form>
   );

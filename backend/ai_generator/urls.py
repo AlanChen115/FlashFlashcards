@@ -4,5 +4,6 @@ from . import views
 
 
 urlpatterns = [
-    path('parse/', views.parse)
+    path('parse/', views.parse),
+    path('batch_parse/', views.batch_parse),
 ]

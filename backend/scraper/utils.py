@@ -19,7 +19,7 @@ def scrape_article(url, timeout=30):
     """
     source = find_source(url)
     chrome_options = Options()
-    chrome_options.add_argument("--headless=new")
+    chrome_options.add_argument("--headless") 
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
@@ -38,12 +38,22 @@ def scrape_article(url, timeout=30):
         # Handle site-specific popups/buttons
         specific_source(source, driver)
 
-        # Load Readability.js
-        load_readability(driver)
+        try:
+            WebDriverWait(driver, 10).until(
+                lambda d: d.execute_script("return document.readyState") == "complete"
+            )
+        except TimeoutException:
+            logger.warning("Page did not fully load before injecting Readability")
 
-        # Wait for Readability to load
-        if not wait_for_readability(driver, timeout):
-            logger.warning("Readability.js failed to load, using fallback")
+        # Load Readability.js
+        readability_loaded = load_readability(driver)
+        if not readability_loaded:
+            logger.warning("Failed to inject Readability.js. Using fallback.")
+            return fallback(driver, url, source)
+
+        # Wait for Readability to initialize
+        if not wait_for_readability(driver, timeout=20):
+            logger.warning("Readability.js did not initialize in time. Using fallback.")
             return fallback(driver, url, source)
 
         # Extract article
@@ -82,7 +92,7 @@ def scrape_article(url, timeout=30):
     finally:
         driver.quit()
 
-def wait_for_readability(driver, timeout=3):
+def wait_for_readability(driver, timeout=20):
     try:
         WebDriverWait(driver, timeout).until(
             lambda d: d.execute_script("return typeof Readability !== 'undefined'")
@@ -92,10 +102,19 @@ def wait_for_readability(driver, timeout=3):
         return False
 
 def load_readability(driver):
+    """Attempts to inject Readability.js. Returns True if successful."""
     scraper_dir = os.path.dirname(__file__)
     filepath = os.path.join(scraper_dir, "readability.js")
-    with open(filepath, "r", encoding="utf-8") as f:
-        driver.execute_script(f.read())
+    if not os.path.exists(filepath):
+        logger.error(f"readability.js not found at {filepath}")
+        return False
+    try:
+        with open(filepath, "r", encoding="utf-8") as f:
+            driver.execute_script(f.read())
+        return True
+    except Exception as e:
+        logger.error(f"Failed to inject Readability.js: {e}")
+        return False
 
 
 def fallback(driver, url, source):
@@ -158,13 +177,13 @@ def clean_text(raw_text):
 def specific_source(source, driver):
     if source == "nhk":
         try:
-            button = WebDriverWait(driver, 10).until(
+            button = WebDriverWait(driver, 20).until(
                 EC.presence_of_element_located(
                     (By.XPATH, "//button[contains(., '確認しました') or contains(., 'I understand')]")
                 )
             )
             driver.execute_script("arguments[0].scrollIntoView(true);", button)
-            WebDriverWait(driver, 10).until(
+            WebDriverWait(driver, 20).until(
                 EC.element_to_be_clickable(
                     (By.XPATH, "//button[contains(., '確認しました') or contains(., 'I understand')]")
                 )

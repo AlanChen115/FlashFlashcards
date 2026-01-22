@@ -13,4 +13,11 @@ def scrape(request):
 #add this functionality later after finishing everything else
 @api_view(['POST'])
 def batch_scrape(request):
-    pass
+    urls = request.data.get('urls', [])
+    data = []
+    if not urls:
+        return Response({"error": "No URLs provided"}, status=400)
+    for url in urls:
+        data.append(scrape_article(url))
+
+    return Response(data)

@@ -18,5 +18,14 @@ def parse(request):
 
 @api_view(['POST'])
 def batch_parse(request):
-    pass
+    texts = request.data.get('body_texts', [])
+    language = request.data.get('language')
+    data = []
+    if not texts:
+        return Response({"error": "No texts provided"}, status=400)
+    if not language:
+        return Response({"error": "No language provided"}, status=400)
+    for text in texts:
+        data = data + parse_article(text, language).get("output", {}).get("flashcards", [])
 
+    return Response({"output": {"flashcards": data}, "error": None})

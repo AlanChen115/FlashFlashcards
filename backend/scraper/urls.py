@@ -4,5 +4,6 @@ from . import views
 
 
 urlpatterns = [
-    path('scrape/', views.scrape)
+    path('scrape/', views.scrape),
+    path('batch_scrape/', views.batch_scrape),
 ]
