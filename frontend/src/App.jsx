@@ -40,26 +40,9 @@ function LinkField( {onGenerate} ) {
         return alert("Please add at least one link.");
       }
       if (links.length === 1) {
-        const response = await postJSON('/api/scraper/scrape/', { url: links[0] });
-        console.log("Scraped data:", response);
-
-        const scraped_data = response;
-        response2 = await postJSON('/api/ai_generator/parse/', {
-          body_text: scraped_data.body_text, language: language
-        });
+        response2 = await postJSON('/api/ai_generator/parse/', { url: links[0], language: language });
       } else {
-        const response = await postJSON('/api/scraper/batch_scrape/', { urls: links });
-        console.log("Scraped data:", response);
-
-        const scraped_data = response;
-        const texts = [];
-        for (const website of scraped_data) {
-          texts.push(website.body_text);
-        } 
-
-        response2 = await postJSON('/api/ai_generator/batch_parse/', {
-          body_texts: texts, language: language
-        });
+        response2 = await postJSON('/api/ai_generator/batch_parse/', { urls: links, language: language });
       }
       console.log("Generated flashcards:", response2);
       onGenerate(response2.output.flashcards);

@@ -1,11 +1,17 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from ai_generator.scraper.scraper import scrape_article
 from .utils import parse_article
 
 # sends a json with text and generates data for the flashcards
 @api_view(['POST'])
 def parse(request):
-    text = request.data.get('body_text')
+    url = request.data.get('url')
+    if not url:
+        return Response({"error": "No URL provided"}, status=400)
+    data = scrape_article(url)
+
+    text = data["body_text"]
     language = request.data.get('language')
     if not text:
         return Response({"error": "No text provided"}, status=400)
@@ -18,7 +24,14 @@ def parse(request):
 
 @api_view(['POST'])
 def batch_parse(request):
-    texts = request.data.get('body_texts', [])
+    urls = request.data.get('urls', [])
+    data = []
+    if not urls:
+        return Response({"error": "No URLs provided"}, status=400)
+    for url in urls:
+        data.append(scrape_article(url))
+
+    texts = [item["body_text"] for item in data]
     language = request.data.get('language')
     data = []
     if not texts:
@@ -29,3 +42,11 @@ def batch_parse(request):
         data = data + parse_article(text, language).get("output", {}).get("flashcards", [])
 
     return Response({"output": {"flashcards": data}, "error": None})
+
+@api_view(['POST'])
+def parse_image(request):
+    pass
+
+@api_view(['POST'])
+def parse_images(request):
+    pass

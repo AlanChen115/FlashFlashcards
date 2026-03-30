@@ -21,7 +21,6 @@ from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/scraper/', include('scraper.urls')),
     path('api/ai_generator/', include('ai_generator.urls')),    
     path('api/exporter/', include('exporter.urls')),
 ]
