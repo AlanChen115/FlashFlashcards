@@ -46,9 +46,10 @@ def batch_parse(request):
 
 @api_view(['POST'])
 def parse_image(request):
-    imageFile = request.FILES.get('image')
+    imageFile = request.FILES.get('file')
     if not imageFile:
         return Response({"error": "No image provided"}, status=400)
+    print("hi")
     language = request.data.get('language')
     if not language:
         return Response({"error": "No language provided"}, status=400)

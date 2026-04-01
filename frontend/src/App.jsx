@@ -19,12 +19,11 @@ async function postJSON(url, body) {
     throw err;
   }
 }
-
 function LinkField( {onGenerate} ) {
   const [links, setLinks] = useState([''])
   const [language, setLanguage] = useState('Japanese');
 
-  const languageOptions = [{value :'Japanese', label: 'Japanese'}];
+  const languageOptions = [{value :'Japanese', label: 'Japanese'}, {value :'Chinese', label: 'Chinese'}];
 
   function handleChange(event, index) {
     const updatedLinks = [...links];
@@ -84,6 +83,38 @@ function LinkField( {onGenerate} ) {
     </form>
   );
 }
+
+function FileUpload( {onGenerate} ) {
+  const [file, setFile] = useState(null);
+  const HandleFileChange = (e) => setFile(e.target.files[0]);
+  const handleSubmit = async () => {
+    if (!file) return alert("Please select a file first!");
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("language", "Japanese"); // Hardcoded for now, can add dropdown later
+
+    try {
+      const response = await fetch("/api/ai_generator/parse_image/", {
+        method: "POST",
+        body: formData,
+      });
+      if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+      const data = await response.json();
+      console.log("Generated flashcards:", data);
+      onGenerate(data.output.flashcards);
+    } catch (err) {
+      alert("File upload failed. Check console for details.");
+    }
+    setFile(null);
+  }
+  return(
+    <div>
+      <input type="file" multiple onChange={HandleFileChange} />
+      <button onClick={handleSubmit}>Submit</button>
+    </div>
+  )
+}
+
 
 function Flashcards({flashcards, setFlashcards}) {
   const handleChange = (index, field, value) => {
@@ -158,6 +189,7 @@ const handleDownload = async () => {
   return (
     <div>
       <LinkField onGenerate={handleGenerate} />
+      <FileUpload onGenerate={handleGenerate} />
       {Flashcards({flashcards, setFlashcards})}
       <button onClick={handleDownload}>Download</button>
       <select value={exportFormat} onChange={(e) => setExportFormat(e.target.value)}>
