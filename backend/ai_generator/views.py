@@ -24,50 +24,44 @@ def parse(request):
     return Response(data)
 
 @api_view(['POST'])
-def batch_parse(request):
+def parse_website(request):
     urls = request.data.get('urls', [])
-    data = []
+    language = request.data.get('language')
+
+    if not language:
+        return Response({"error": "No language provided"}, status=400)
     if not urls:
-        return Response({"error": "No URLs provided"}, status=400)
+        return Response({"error": "No URL(s) provided"}, status=400)
+
+    output = []
     for url in urls:
-        data.append(scrape_article(url))
+        scraped = scrape_article(url)
+        text = scraped.get("body_text", "")
 
-    texts = [item["body_text"] for item in data]
-    language = request.data.get('language')
-    data = []
-    if not texts:
-        return Response({"error": "No texts provided"}, status=400)
-    if not language:
-        return Response({"error": "No language provided"}, status=400)
-    for text in texts:
-        data = data + parse_article(text, language).get("output", {}).get("flashcards", [])
+        if not text:
+            return Response({"error": f"No text found at {url}"}, status=400)
 
-    return Response({"output": {"flashcards": data}, "error": None})
+        parsed = parse_article(text, language)
 
-@api_view(['POST'])
-def parse_image(request):
-    imageFile = request.FILES.get('file')
-    if not imageFile:
-        return Response({"error": "No image provided"}, status=400)
-    print("hi")
-    language = request.data.get('language')
-    if not language:
-        return Response({"error": "No language provided"}, status=400)
-    text = get_text_from_image(imageFile, language)
-    data = parse_article(text, language)
-    return Response(data)
+        if parsed.get("error"):
+            return Response({"error": f"Failed to parse {url}: {parsed['error']}"}, status=500)
+
+        flashcards = (parsed.get("output") or {}).get("flashcards", [])
+        output.append({"url": url, "flashcards": flashcards})
+
+    return Response({"output": output, "error": None})
 
 @api_view(['POST'])
 def parse_images(request):
-    imageFiles = request.FILES.getlist('images')
+    imageFiles = request.FILES.getlist('files')
     if not imageFiles:
         return Response({"error": "No images provided"}, status=400)
     language = request.data.get('language')
     if not language:
         return Response({"error": "No language provided"}, status=400)
-    data = []
+    output = []
     for imageFile in imageFiles:
         text = get_text_from_image(imageFile, language)
-        data = data + parse_article(text, language).get("output", {}).get("flashcards", [])
-    return Response({"output": {"flashcards": data}, "error": None})
+        output.append({"image": imageFile.name, "flashcards": parse_article(text, language).get("output", {}).get("flashcards", [])})
+    return Response({"output": output, "error": None})
     

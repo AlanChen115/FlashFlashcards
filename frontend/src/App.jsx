@@ -19,6 +19,7 @@ async function postJSON(url, body) {
     throw err;
   }
 }
+
 function LinkField( {onGenerate} ) {
   const [links, setLinks] = useState([''])
   const [language, setLanguage] = useState('Japanese');
@@ -34,17 +35,22 @@ function LinkField( {onGenerate} ) {
   const handleSubmit = async (event) => {
     event.preventDefault()
     try {
-      let response2;
+      let response;
       if (links.length === 0) {
         return alert("Please add at least one link.");
+      } 
+        
+      response = await postJSON('/api/ai_generator/parse_website/', { urls: links, language: language });
+      
+      console.log("API response:", response);
+
+      const flashcards = []
+      for (const website of response.output){
+        flashcards.push(...website.flashcards);
       }
-      if (links.length === 1) {
-        response2 = await postJSON('/api/ai_generator/parse/', { url: links[0], language: language });
-      } else {
-        response2 = await postJSON('/api/ai_generator/batch_parse/', { urls: links, language: language });
-      }
-      console.log("Generated flashcards:", response2);
-      onGenerate(response2.output.flashcards);
+
+      console.log("Generated flashcards:", flashcards);
+      onGenerate(flashcards);
     } catch (err) {
       alert("Check console for details.");
     }
@@ -86,26 +92,34 @@ function LinkField( {onGenerate} ) {
 
 function FileUpload( {onGenerate} ) {
   const [file, setFile] = useState(null);
-  const HandleFileChange = (e) => setFile(e.target.files[0]);
+  const HandleFileChange = (e) => setFile(e.target.files);
   const handleSubmit = async () => {
     if (!file) return alert("Please select a file first!");
     const formData = new FormData();
-    formData.append("file", file);
+    for (let i = 0; i < file.length; i++) {
+      formData.append("files", file[i]);
+    }
     formData.append("language", "Japanese"); // Hardcoded for now, can add dropdown later
 
     try {
-      const response = await fetch("/api/ai_generator/parse_image/", {
+      const response = await fetch("/api/ai_generator/parse_images/", {
         method: "POST",
         body: formData,
       });
       if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+      
       const data = await response.json();
-      console.log("Generated flashcards:", data);
-      onGenerate(data.output.flashcards);
+      const flashcards = []
+      for (const image of data.output){
+        flashcards.push(...image.flashcards);
+      }
+
+      console.log("Generated flashcards:", flashcards);
+
+      onGenerate(flashcards);
     } catch (err) {
       alert("File upload failed. Check console for details.");
     }
-    setFile(null);
   }
   return(
     <div>

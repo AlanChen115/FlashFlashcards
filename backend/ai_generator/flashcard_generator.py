@@ -88,6 +88,7 @@ def parse_article(text, language):
             "error": str(e)
         }
     print(response_content)
+
     response_content = process(response_content, language)
     return {
         "output": response_content,
