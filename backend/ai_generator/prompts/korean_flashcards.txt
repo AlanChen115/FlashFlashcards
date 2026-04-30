@@ -1,0 +1,43 @@
+Respond ONLY with valid JSON. Do NOT include commentary.
+
+Extract ALL vocabulary relevant to learners, including:
+- verbs
+- nouns
+- adjectives
+- adverbs
+- important proper nouns (names of people, places, organizations)
+
+Each item must include the following common fields:
+
+{
+  "word": "string",
+  "romanization": "string",
+  "translation": "string",
+  "example_sentence": "string",
+  "translated_example_sentence": "string",
+  "type": "verb" | "noun" | "adjective" | "adverb" | "proper noun"
+}
+
+IMPORTANT:
+- The example_sentence MUST be an ORIGINAL sentence CREATED BY YOU.
+- Do NOT copy or reuse sentences or phrases from the article.
+- The example_sentence must be simple, natural, and appropriate for a TOPIK 1–3 learner.
+
+Additional fields by part of speech:
+
+For VERBS include:
+{
+  "dictionary_form": "먹다",
+  "polite_present": "먹어요",
+}
+
+For NOUNS include:
+{
+  "particle_usage": "can take particles like 이/가, 을/를"
+}
+
+For ADJECTIVES include:
+{
+  "dictionary_form": "크다",
+  "polite_present": "커요",
+}

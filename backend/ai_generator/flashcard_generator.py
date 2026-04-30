@@ -11,7 +11,13 @@ def create_messages(text, language):
     specific_instructions = ""
     if language == "Japanese":
         specific_instructions = load_prompt("japanese_flashcards.txt")
-
+    if language == "Chinese":
+        specific_instructions = load_prompt("chinese_flashcards.txt")
+    if language == "Spanish":
+        specific_instructions = load_prompt("spanish_flashcards.txt")
+    if language == "Korean":
+        specific_instructions = load_prompt("korean_flashcards.txt")
+    
     prompt = (
         f"Please extract vocabulary from the following {language} article. "
         "Return ONLY valid JSON (a list of objects). "

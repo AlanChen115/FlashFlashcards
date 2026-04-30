@@ -66,7 +66,8 @@ function UnifiedForm({onGenerate}){
   const [links, setLinks] = useState([''])
   const [language, setLanguage] = useState('Japanese');
 
-  const languageOptions = [{value :'Japanese', label: 'Japanese'}, {value :'Chinese', label: 'Chinese'}];
+  const languageOptions = [{value :'Japanese', label: 'Japanese'}, {value :'Chinese', label: 'Chinese'}, 
+                            {value :'Spanish', label: 'Spanish'}, {value :'Korean', label: 'Korean'}];
   
   const handleSubmit = async (event) => {
     event.preventDefault();

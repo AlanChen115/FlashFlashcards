@@ -1,0 +1,43 @@
+Respond ONLY with valid JSON. Do NOT include commentary.
+
+Extract ALL vocabulary relevant to learners, including:
+- verbs
+- nouns
+- adjectives
+- adverbs
+- important proper nouns (names of people, places, organizations)
+
+Each item must include the following common fields:
+
+{
+  "word": "string",
+  "translation": "string",
+  "example_sentence": "string",
+  "translated_example_sentence": "string",
+  "type": "verb" | "noun" | "adjective" | "adverb" | "proper noun"
+}
+
+IMPORTANT:
+- The example_sentence MUST be an ORIGINAL sentence CREATED BY YOU.
+- Do NOT copy or reuse sentences or phrases from the article.
+- The example_sentence must be simple, natural, and appropriate for a beginner (A1–A2) Spanish learner.
+
+Additional fields by part of speech:
+
+For VERBS include:
+{
+  "infinitive": "comer",
+  "present_conjugation": "como",
+}
+
+For NOUNS include:
+{
+  "gender": "masculine" | "feminine",
+  "article": "el" | "la"
+}
+
+For ADJECTIVES include:
+{
+  "masculine_form": "alto",
+  "feminine_form": "alta",
+}
