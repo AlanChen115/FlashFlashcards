@@ -49,36 +49,125 @@ def extract_json(text):
     match = re.search(r'(\[.*?\]|\{.*?\})', text, re.DOTALL)
     return match.group(1) if match else text   
 
+def addFlashcards(processed_content, item, back):
+    front = item.get('translation', '') + "\n　ex: " + item.get('translated_example_sentence', '')
+    processed_content["flashcards"].append({
+        "front": front,
+        "back": back 
+    })
+
+def processJapanese(processed_content, response_content):
+    for item in response_content:
+        if item.get("type") == "verb":
+            back = (
+                f"({item.get('particles', '')})"
+                f"{item.get('dictionary_form_kanji', '')}\n"
+                f"{item.get('dictionary_form_hiragana', '')}・"
+                f"{item.get('masu_form_hiragana', '')}\n"
+                f"例：{item.get('example_sentence', '')}"
+            )
+        else:
+            back = f"{item.get('word', '')}\n例：{item.get('example_sentence', '')}"
+        addFlashcards(processed_content, item, back)
+    return processed_content
+
+def processChinese(processed_content, response_content):
+    for item in response_content:
+        pinyin = item.get('pinyin', '')
+        if item.get("type") == "noun":
+            back = (
+                f"{item.get('word', '')}"
+                f"({pinyin})\n"
+                f"例：{item.get('example_sentence', '')}"
+            )
+        else:
+            back = (
+                f"{item.get('word', '')}\n"
+                f"例：{item.get('example_sentence', '')}"
+                f"({pinyin})\n"
+            )
+        addFlashcards(processed_content, item, back)
+    return processed_content
+
+def processSpanish(processed_content, response_content):
+    for item in response_content:
+        match item.get("type"):
+            case "noun":
+                back = (
+                    f"({item.get('article', '')})"
+                    f"{item.get('word', '')}\n"
+                    f"ejemplo: {item.get('example_sentence', '')}"
+                )
+            case "adjective":
+                back = (
+                    f"{item.get('feminine_form', '')}/"
+                    f"{item.get('masculine_form', '')}\n"
+                    f"ejemplo: {item.get('example_sentence', '')}"
+                )
+            case "verbs":
+                back = (
+                    f"{item.get('infinitive', '')}/"
+                    f"{item.get('present_conjugation', '')}\n"
+                    f"ejemplo: {item.get('example_sentence', '')}"
+                )
+            case _:
+                back = (
+                    f"{item.get('word', '')}\n"
+                    f"ejemplo: {item.get('example_sentence', '')}"
+                )
+        addFlashcards(processed_content, item, back)
+    return processed_content
+
+def processKorean(processed_content, response_content):
+    for item in response_content:
+        romanization = item.get('romanization', '')
+        match item.get("type"):
+            case "verb":
+                back = (
+                    f"{item.get('dictionary_form', '')} "
+                    f"({romanization})\n"
+                    f"→ {item.get('polite_present', '')}\n"
+                    f"예: {item.get('example_sentence', '')}"
+                )
+            case "adjective":
+                back = (
+                    f"{item.get('dictionary_form', '')} "
+                    f"({romanization})\n"
+                    f"→ {item.get('polite_present', '')}\n"
+                    f"예: {item.get('example_sentence', '')}"
+                )
+            case "noun":
+                back = (
+                    f"{item.get('word', '')} ({romanization})\n"
+                    f"{item.get('particle_usage', '')}\n"
+                    f"예: {item.get('example_sentence', '')}"
+                )
+            case _:
+                back = (
+                    f"{item.get('word', '')} ({romanization})\n"
+                    f"예: {item.get('example_sentence', '')}"
+                )
+        addFlashcards(processed_content, item, back)
+    return processed_content
+
 # process the data returned by groq and return it in a easy to use flashcard format
 def process(response_content, language):
     processed_content = {
         "flashcards": []
     }
-    if language == "Japanese":
-        for item in response_content:
-            word = item.get("word", "")
-            translation = item.get("translation", "")
-            example_sentence = item.get("example_sentence", "")
-            translated_example_sentence = item.get("translated_example_sentence", "")
-            if item.get("type") == "verb":
-                front = f"{translation}\n　ex: {translated_example_sentence}"
-                back = (
-                    f"({item.get('particles', '')})"
-                    f"{item.get('dictionary_form_kanji', '')}\n"
-                    f"{item.get('dictionary_form_hiragana', '')}・"
-                    f"{item.get('masu_form_hiragana', '')}\n"
-                    f"例：{example_sentence}"
-                )
-            else:
-                front = f"{translation}\n　ex: {translated_example_sentence}"
-                back = f"{word}\n例：{example_sentence}"
-        
-            processed_content["flashcards"].append({
-                "front": front,
-                "back": back
-            })
-
-    return processed_content
+    match language:
+        case "Japanese":
+            return processJapanese(processed_content, response_content)
+        case "Chinese":
+            return processChinese(processed_content, response_content)
+        case "Spanish":
+            return processSpanish(processed_content, response_content)
+        case "Korean":
+            return processKorean(processed_content, response_content)
+        case _:
+            ## want to add a general processor for other stuff. For now just return the raw content and print a warning
+            print(f"Warning: No processor for language '{language}'")
+            return processed_content
 
 def parse_article(text, language):
     messages = create_messages(text, language)
