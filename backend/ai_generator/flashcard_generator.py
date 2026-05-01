@@ -52,6 +52,7 @@ def extract_json(text):
 def addFlashcards(processed_content, item, back):
     front = item.get('translation', '') + "\n　ex: " + item.get('translated_example_sentence', '')
     processed_content["flashcards"].append({
+        "lemma": item.get('lemma', ''),
         "front": front,
         "back": back 
     })

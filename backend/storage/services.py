@@ -8,9 +8,8 @@ def ingest_accepted_flashcards(flashcards, language):
     for card in flashcards:
         front = card.get("front", "")
         back = card.get("back", "")
-        # lemma = card.get("lemma", "") --- IGNORE --- for now we don't have lemma, but we can add it later if we want
-        lemma = ""
-        
+        lemma = card.get("lemma", "")
+
         content_hash = hashlib.sha256(
             f"{front}:{back}".encode()
         ).hexdigest()
@@ -31,8 +30,35 @@ def ingest_accepted_flashcards(flashcards, language):
             existing.append(str(obj.id))
 
     return {
-        "saved": saved,
-        "existing": existing,
+        "flashcards": flashcards,
         "saved_count": len(saved),
         "existing_count": len(existing),
+    }
+
+def similar_check(flashcards):
+    lemmas = [card.get('lemma', '') for card in flashcards if card.get('lemma')]
+    
+    matches = Flashcard.objects.filter(lemma__in=lemmas).values('lemma', 'front', 'back')
+   
+    grouped = {}
+    for card in matches:
+        lemma = card.get('lemma', '')
+        if lemma not in grouped:
+            grouped[lemma] = []
+        grouped[lemma].append({
+            "front": card.get('front', ''),
+            "back": card.get('back', '')
+        })
+
+    result = []
+    for card in flashcards:
+        lemma = card.get('lemma', '')
+        similar_cards = grouped.get(lemma, [])
+        result.append({"front": card.get('front', ''), 
+                       "back": card.get('back', ''), 
+                       "similar": len(similar_cards) > 0, 
+                       "similar_cards": list(similar_cards)
+                    })
+    return {
+        "flashcards": result,
     }

@@ -11,12 +11,15 @@ Each item must include the following common fields:
 
 {
   "word": "string",
+  "lemma": "string",
   "romanization": "string",
   "translation": "string",
   "example_sentence": "string",
   "translated_example_sentence": "string",
   "type": "verb" | "noun" | "adjective" | "adverb" | "proper noun"
 }
+
+Lemma should be the base or dictionary form of the word.
 
 IMPORTANT:
 - The example_sentence MUST be an ORIGINAL sentence CREATED BY YOU.

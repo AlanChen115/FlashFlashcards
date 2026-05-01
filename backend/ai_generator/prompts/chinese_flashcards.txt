@@ -11,12 +11,15 @@ Each item must include the following common fields:
 
 {
   "word": "string",
+  "lemma": "string",
   "pinyin": "string",
   "translation": "string",
   "example_sentence": "string",
   "translated_example_sentence": "string",
   "type": "verb" | "noun" | "adjective" | "adverb" | "proper noun"
 }
+
+Lemma should be the base or canonical form of the word.
 
 IMPORTANT:
 - The example_sentence MUST be an ORIGINAL sentence CREATED BY YOU.
