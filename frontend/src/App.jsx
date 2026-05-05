@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import './App.css'
 
 async function postJSON(url, body) {
@@ -20,7 +20,7 @@ async function postJSON(url, body) {
   }
 }
 
-function LinkField({links, setLinks, language, setLanguage}) {
+function LinkField({links, setLinks}) {
   function handleChange(event, index) {
     const updatedLinks = [...links];
     updatedLinks[index] = event.target.value;
@@ -132,7 +132,7 @@ function UnifiedForm({onGenerate}){
             </option>
           ))}
         </select>
-        <LinkField links={links} setLinks={setLinks} language={language} setLanguage={setLanguage} />
+        <LinkField links={links} setLinks={setLinks} />
         <FileUpload files = {file} setFile={setFile} />
         <button type="submit">Submit</button>
       </form>
@@ -141,11 +141,58 @@ function UnifiedForm({onGenerate}){
 }
 
 function Flashcards({flashcards, setFlashcards}) {
+  const debounceRefs = useRef(null);
+  const pendingCheckIndexes = useRef(new Set());
+  const [hoveredIndex, setHoveredIndex] = useState(null);
   const handleChange = (index, field, value) => {
-    const updatedFlashcards = [...flashcards];
-    updatedFlashcards[index][field] = value;
-    setFlashcards(updatedFlashcards);
+    pendingCheckIndexes.current.add(index);
+    setFlashcards((current) => {
+      const updatedFlashcards = [...current];
+      updatedFlashcards[index] = { ...updatedFlashcards[index], [field]: value };
+      return updatedFlashcards;
+    });
+
+    if (debounceRefs.current) {
+      clearTimeout(debounceRefs.current);
+    }
+    debounceRefs.current = setTimeout(() => {
+      checkSimilarCards(flashcards);
+    }, 400);
   }
+
+  const checkSimilarCards = async (latestFlashcards) => {
+    const indexes = Array.from(pendingCheckIndexes.current);
+    pendingCheckIndexes.current.clear();
+    debounceRefs.current = null;
+
+    const cardsToCheck = indexes.map(i => latestFlashcards[i]);
+
+    if (!cardsToCheck.length) return; // no cards to check
+    if (!cardsToCheck.some(c => c.lemma)) return; // skip for know, Will add lemma gen later
+    
+    try {
+      const response = await postJSON('/api/storage/similar/', { flashcards: cardsToCheck });
+      
+      setFlashcards((current) => {
+        const updatedFlashcards = [...current];
+        response.flashcards.forEach((returnedCard, i) => {
+          const originalIndex = indexes[i];
+          updatedFlashcards[originalIndex] = {
+            ...updatedFlashcards[originalIndex],
+            similar: returnedCard.similar,
+            similar_cards: returnedCard.similar_cards,
+          }
+        });
+
+        return updatedFlashcards;
+      })
+
+
+    } catch (error) {
+      console.error("Error checking similar cards:", error);
+    }
+  };
+
   return (
     <div className="flashcards-container">
       {flashcards.map((card, index) => (
@@ -160,6 +207,25 @@ function Flashcards({flashcards, setFlashcards}) {
             value={card.back}
             onChange={(e) => handleChange(index, 'back', e.target.value)}
           />
+          {card.similar && (
+            <div 
+              className="similar-indicator"
+              onMouseEnter={() => setHoveredIndex(index)}
+              onMouseLeave={() => setHoveredIndex(null)}
+            >
+              ⚠️ Similar card found!
+              {hoveredIndex === index && (
+                <div className="similar-tooltip">
+                  <p className="similar-title">Similar cards:</p>
+                  {card.similar_cards.map((sim, i) => (
+                    <div key={i} className="similar-item">
+                      <strong>{sim.front}</strong> → {sim.back}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
           <button onClick={() => {
             const updatedFlashcards = flashcards.filter((_, i) => i !== index);
             setFlashcards(updatedFlashcards);
@@ -179,8 +245,14 @@ function App() {
   const [flashcards, setFlashcards] = useState([]);
   const [exportFormat, setExportFormat] = useState('');
 
-  const handleGenerate = (generatedFlashcards) => {
-    setFlashcards(generatedFlashcards);
+  const handleGenerate = async (generatedFlashcards) => {
+    try {
+      const response = await postJSON('/api/storage/similar/', { flashcards: generatedFlashcards });
+        setFlashcards(response.flashcards);
+      console.log("Checked flashcards:", response.flashcards);
+    } catch (err) {
+      console.error("Error checking similar cards:", err);
+    }
   }
 
 const handleDownload = async () => {
@@ -213,7 +285,7 @@ const handleDownload = async () => {
   return (
     <div>
       <UnifiedForm onGenerate={handleGenerate} />
-      {Flashcards({flashcards, setFlashcards})}
+      <Flashcards flashcards={flashcards} setFlashcards={setFlashcards} />
       <button onClick={handleDownload}>Download</button>
       <select value={exportFormat} onChange={(e) => setExportFormat(e.target.value)}>
         <option value="anki">Anki (.apkg)</option>
