@@ -20,6 +20,33 @@ async function postJSON(url, body) {
   }
 }
 
+function createFileFormData(files, fields = {}) {
+  const formData = new FormData();
+
+  for (let i = 0; i < files.length; i++) {
+    formData.append("files", files[i]);
+  }
+
+  Object.entries(fields).forEach(([key, value]) => {
+    formData.append(key, value);
+  });
+
+  return formData;
+}
+
+async function postFormData(url, formData) {
+  const response = await fetch(url, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Request failed: ${response.status}`);
+  }
+
+  return await response.json();
+}
+
 function LinkField({links, setLinks}) {
   function handleChange(event, index) {
     const updatedLinks = [...links];
@@ -53,11 +80,9 @@ function LinkField({links, setLinks}) {
 }
 
 function FileUpload({file, setFile}) {
-    const HandleFileChange = (e) => setFile(e.target.files);
+    const handleFileChange = (e) => setFile(e.target.files);
   return(
-    <div>
-      <input type="file" multiple onChange={HandleFileChange} />
-    </div>
+      <input type="file" multiple onChange={handleFileChange} />
   )
 }
 
@@ -83,19 +108,8 @@ function UnifiedForm({onGenerate, language, setLanguage}){
       
       // Handle file uploads
       if (hasFiles) {
-        const formData = new FormData();
-        for (let i = 0; i < file.length; i++) {
-          formData.append("files", file[i]);
-        }
-        formData.append("language", language);
-
-        const fileResponse = await fetch("/api/ai_generator/parse_images/", {
-          method: "POST",
-          body: formData,
-        });
-        if (!fileResponse.ok) throw new Error(`File request failed: ${fileResponse.status}`);
-        
-        const fileData = await fileResponse.json();
+        const formData = createFileFormData(file, { language });
+        const fileData = await postFormData("/api/ai_generator/parse_images/", formData);
         for (const image of fileData.output) {
           allFlashcards.push(...image.flashcards);
         }
@@ -248,6 +262,32 @@ function Flashcards({flashcards, setFlashcards, language}) {
       }}>Add Flashcard</button>
     </div>
   );
+}
+
+function ImportForm({language}){
+  const [file, setFile] = useState(null);
+
+  const handleFileChange = (e) => {
+    setFile(e.target.files);
+  };
+
+  const handleImport = async (e) => {
+    e.preventDefault();
+    if (!file) return alert("Please select a file to import.");
+  
+    const formData = createFileFormData(file, { language });
+
+    await postFormData("/api/storage/commit/", formData);
+  };
+  return(
+    // idk if other flashcard formats will need to be supported for now only anki and quizlet(csv).
+    <div>
+      <form onSubmit = {handleImport}>
+        <input type="file" multiple accept=".apkg,.csv" onChange={handleFileChange} />
+        <button type="submit">Import</button>
+      </form>
+    </div>
+  )
 }
 
 function App() { 
