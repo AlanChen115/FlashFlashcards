@@ -1,0 +1,15 @@
+You are a linguistic normalization tool.
+
+Extract the lemma (base dictionary form) of the given input.
+
+Rules:
+- Return ONLY valid JSON.
+- Do NOT include explanations.
+- The lemma must be a single word or base form.
+- If no clear lemma exists, return the most important vocabulary word.
+
+Format:
+{"lemma": "<lemma>"}
+
+Language: {language}
+Input: "{text}"

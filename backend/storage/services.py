@@ -1,5 +1,20 @@
 import hashlib
+from ai_generator.lemma import generate_lemma
 from .models import Flashcard
+
+
+def get_card_lemma(card, language):
+    lemma = card.get("lemma", "")
+    if lemma:
+        return lemma
+
+    text = card.get("back", "") or card.get("front", "")
+    if not text:
+        return ""
+
+    result = generate_lemma(text, language)
+    return result.get("output") or ""
+
 
 def ingest_accepted_flashcards(flashcards, language):
     saved = []
@@ -35,10 +50,21 @@ def ingest_accepted_flashcards(flashcards, language):
         "existing_count": len(existing),
     }
 
-def similar_check(flashcards):
-    lemmas = [card.get('lemma', '') for card in flashcards if card.get('lemma')]
+def similar_check(flashcards, language):
+    cards_with_lemmas = []
+    for card in flashcards:
+        lemma = get_card_lemma(card, language)
+        cards_with_lemmas.append({
+            **card,
+            "lemma": lemma,
+        })
+
+    lemmas = [card.get('lemma', '') for card in cards_with_lemmas if card.get('lemma')]
     
-    matches = Flashcard.objects.filter(lemma__in=lemmas).values('lemma', 'front', 'back')
+    matches = Flashcard.objects.filter(
+        lemma__in=lemmas,
+        language=language,
+    ).values('lemma', 'front', 'back')
    
     grouped = {}
     for card in matches:
@@ -51,11 +77,12 @@ def similar_check(flashcards):
         })
 
     result = []
-    for card in flashcards:
+    for card in cards_with_lemmas:
         lemma = card.get('lemma', '')
         similar_cards = grouped.get(lemma, [])
         result.append({"front": card.get('front', ''), 
                        "back": card.get('back', ''), 
+                       "lemma": lemma,
                        "similar": len(similar_cards) > 0, 
                        "similar_cards": list(similar_cards)
                     })

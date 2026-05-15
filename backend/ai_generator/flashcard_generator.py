@@ -1,11 +1,6 @@
-import os
 import json
-import re
-from groq import Groq
-from django.conf import settings
 
-api_key = os.environ.get("GROQ_API_KEY")
-client = Groq(api_key=api_key.strip() if api_key else None)
+from .utils import create_chat_completion, load_prompt, parse_json_response
 
 def create_messages(text, language):
     specific_instructions = ""
@@ -25,29 +20,13 @@ def create_messages(text, language):
         f"Article:\n{text}"
     )
 
-    chat_completion = client.chat.completions.create(
-        messages=[
+    chat_completion = create_chat_completion(
+        [
             {"role": "system", "content": "You must respond only with valid JSON."},
             {"role": "user", "content": prompt}
-        ],
-        model="llama-3.3-70b-versatile"
+        ]
     )
     return chat_completion
-
-def load_prompt(name):
-    prompt_path = os.path.join(
-        settings.BASE_DIR,
-        "ai_generator",
-        "prompts",
-        name
-    )
-    with open(prompt_path, 'r', encoding='utf-8') as f:
-        return f.read()
-    
-def extract_json(text):
-    # Extract the FIRST {...} or [...] block
-    match = re.search(r'(\[.*?\]|\{.*?\})', text, re.DOTALL)
-    return match.group(1) if match else text   
 
 def addFlashcards(processed_content, item, back):
     front = item.get('translation', '') + "\n　ex: " + item.get('translated_example_sentence', '')
@@ -174,8 +153,7 @@ def parse_article(text, language):
     messages = create_messages(text, language)
     try:
         raw = messages.choices[0].message.content
-        cleaned = extract_json(raw)
-        response_content = json.loads(cleaned)
+        response_content = parse_json_response(raw)
     except json.JSONDecodeError as e:
         print("LLM did not return valid JSON:")
         print(raw)

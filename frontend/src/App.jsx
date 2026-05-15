@@ -61,10 +61,9 @@ function FileUpload({file, setFile}) {
   )
 }
 
-function UnifiedForm({onGenerate}){
+function UnifiedForm({onGenerate, language, setLanguage}){
   const [file, setFile] = useState(null);
   const [links, setLinks] = useState([''])
-  const [language, setLanguage] = useState('Japanese');
 
   const languageOptions = [{value :'Japanese', label: 'Japanese'}, {value :'Chinese', label: 'Chinese'}, 
                             {value :'Spanish', label: 'Spanish'}, {value :'Korean', label: 'Korean'}];
@@ -140,15 +139,24 @@ function UnifiedForm({onGenerate}){
   )
 }
 
-function Flashcards({flashcards, setFlashcards}) {
+function Flashcards({flashcards, setFlashcards, language}) {
   const debounceRefs = useRef(null);
   const pendingCheckIndexes = useRef(new Set());
+  const latestFlashcardsRef = useRef(flashcards);
   const [hoveredIndex, setHoveredIndex] = useState(null);
+
+  latestFlashcardsRef.current = flashcards;
+
   const handleChange = (index, field, value) => {
     pendingCheckIndexes.current.add(index);
     setFlashcards((current) => {
       const updatedFlashcards = [...current];
-      updatedFlashcards[index] = { ...updatedFlashcards[index], [field]: value };
+      updatedFlashcards[index] = {
+        ...updatedFlashcards[index],
+        [field]: value,
+        ...(field === "back" ? { lemma: "" } : {}),
+      };
+      latestFlashcardsRef.current = updatedFlashcards;
       return updatedFlashcards;
     });
 
@@ -156,7 +164,7 @@ function Flashcards({flashcards, setFlashcards}) {
       clearTimeout(debounceRefs.current);
     }
     debounceRefs.current = setTimeout(() => {
-      checkSimilarCards(flashcards);
+      checkSimilarCards(latestFlashcardsRef.current);
     }, 400);
   }
 
@@ -168,10 +176,9 @@ function Flashcards({flashcards, setFlashcards}) {
     const cardsToCheck = indexes.map(i => latestFlashcards[i]);
 
     if (!cardsToCheck.length) return; // no cards to check
-    if (!cardsToCheck.some(c => c.lemma)) return; // skip for know, Will add lemma gen later
     
     try {
-      const response = await postJSON('/api/storage/similar/', { flashcards: cardsToCheck });
+      const response = await postJSON('/api/storage/similar/', { flashcards: cardsToCheck, language });
       
       setFlashcards((current) => {
         const updatedFlashcards = [...current];
@@ -179,6 +186,7 @@ function Flashcards({flashcards, setFlashcards}) {
           const originalIndex = indexes[i];
           updatedFlashcards[originalIndex] = {
             ...updatedFlashcards[originalIndex],
+            lemma: returnedCard.lemma,
             similar: returnedCard.similar,
             similar_cards: returnedCard.similar_cards,
           }
@@ -244,10 +252,11 @@ function Flashcards({flashcards, setFlashcards}) {
 function App() { 
   const [flashcards, setFlashcards] = useState([]);
   const [exportFormat, setExportFormat] = useState('');
+  const [language, setLanguage] = useState('Japanese');
 
   const handleGenerate = async (generatedFlashcards) => {
     try {
-      const response = await postJSON('/api/storage/similar/', { flashcards: generatedFlashcards });
+      const response = await postJSON('/api/storage/similar/', { flashcards: generatedFlashcards, language });
         setFlashcards(response.flashcards);
       console.log("Checked flashcards:", response.flashcards);
     } catch (err) {
@@ -284,8 +293,8 @@ const handleDownload = async () => {
 
   return (
     <div>
-      <UnifiedForm onGenerate={handleGenerate} />
-      <Flashcards flashcards={flashcards} setFlashcards={setFlashcards} />
+      <UnifiedForm onGenerate={handleGenerate} language={language} setLanguage={setLanguage} />
+      <Flashcards flashcards={flashcards} setFlashcards={setFlashcards} language={language} />
       <button onClick={handleDownload}>Download</button>
       <select value={exportFormat} onChange={(e) => setExportFormat(e.target.value)}>
         <option value="anki">Anki (.apkg)</option>

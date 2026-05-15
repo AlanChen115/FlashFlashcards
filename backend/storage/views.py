@@ -15,8 +15,10 @@ def commit(request):
 
     return Response(result)
 
-@api_view(['GET'])
+@api_view(['POST'])
 def similar(request):
-    flashcards = request.data.get('flashcards', [])
-    result = similar_check(flashcards)
+    data = request.data
+    flashcards = data.get('flashcards', [])
+    language = data.get('language', 'Unknown')
+    result = similar_check(flashcards, language)
     return Response(result)
