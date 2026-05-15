@@ -216,6 +216,15 @@ function Flashcards({flashcards, setFlashcards, language}) {
     }
   };
 
+  const handleClearAll = () => {
+    if (!flashcards.length) return;
+
+    const shouldClear = window.confirm("Clear all flashcards?");
+    if (!shouldClear) return;
+
+    setFlashcards([]);
+  }
+
   return (
     <div className="flashcards-container">
       {flashcards.map((card, index) => (
@@ -260,34 +269,70 @@ function Flashcards({flashcards, setFlashcards, language}) {
         updatedFlashcards.push({ front: '', back: '' });
         setFlashcards(updatedFlashcards);
       }}>Add Flashcard</button>
+      <button onClick={handleClearAll}>Clear All</button>
     </div>
   );
 }
 
-function ImportForm({language}){
+function ImportForm({ onImport , language, setLanguage}) {
   const [file, setFile] = useState(null);
-
   const handleFileChange = (e) => {
     setFile(e.target.files);
   };
 
-  const handleImport = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!file) return alert("Please select a file to import.");
   
     const formData = createFileFormData(file, { language });
 
-    await postFormData("/api/storage/commit/", formData);
+    const response = await postFormData("/api/storage/import/", formData);
+
+    onImport(response.output.flashcards)
   };
   return(
     // idk if other flashcard formats will need to be supported for now only anki and quizlet(csv).
     <div>
-      <form onSubmit = {handleImport}>
+      <form onSubmit = {handleSubmit}>
         <input type="file" multiple accept=".apkg,.csv" onChange={handleFileChange} />
         <button type="submit">Import</button>
       </form>
     </div>
   )
+}
+
+function ImportField() {
+    const [importedFlashcards, setImportedFlashcards] = useState([]);
+    const [language, setLanguage] = useState("Japanese");
+    const languageOptions = [{value :'Japanese', label: 'Japanese'}, {value :'Chinese', label: 'Chinese'}, 
+                            {value :'Spanish', label: 'Spanish'}, {value :'Korean', label: 'Korean'}];
+
+    const handleImport = (cards) => {
+      setImportedFlashcards(cards);
+    };
+
+    const handleAccept = async () => {
+      await postJSON("/api/storage/commit/", {flashcards: importedFlashcards, language: language});
+      setImportedFlashcards([]);
+    }
+
+    return (
+    <div>
+      <label>Import Language:</label>
+      <select value={language} onChange={(e) => setLanguage(e.target.value)}>
+        {languageOptions.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+      <ImportForm onImport={handleImport} language={language} setLanguage={setLanguage} />
+      <h2>Imported Flashcards</h2>
+      <Flashcards flashcards={importedFlashcards} setFlashcards={setImportedFlashcards} language={language} />
+      <button onClick={handleAccept}>Accept Imported Flashcards</button>
+    </div>
+  )
+
 }
 
 function App() { 
@@ -319,6 +364,8 @@ const handleDownload = async () => {
       body: JSON.stringify({ flashcards: acceptedFlashcards }),
     });
 
+    setFlashcards([]); // Clear flashcards after export
+
     if (!response.ok) throw new Error(`Request failed: ${response.status}`);
 
     // Get file data as a blob
@@ -334,17 +381,21 @@ const handleDownload = async () => {
     } catch (err) {
       alert("Export failed. Check console for details.");
     }
+
   }
 
   return (
     <div>
-      <UnifiedForm onGenerate={handleGenerate} language={language} setLanguage={setLanguage} />
-      <Flashcards flashcards={flashcards} setFlashcards={setFlashcards} language={language} />
-      <button onClick={handleDownload}>Download</button>
-      <select value={exportFormat} onChange={(e) => setExportFormat(e.target.value)}>
-        <option value="anki">Anki (.apkg)</option>
-        <option value="quizlet">Quizlet (.csv)</option>
-      </select>
+      <div>
+        <UnifiedForm onGenerate={handleGenerate} language={language} setLanguage={setLanguage} />
+        <Flashcards flashcards={flashcards} setFlashcards={setFlashcards} language={language} />
+        <button onClick={handleDownload}>Download</button>
+        <select value={exportFormat} onChange={(e) => setExportFormat(e.target.value)}>
+          <option value="anki">Anki (.apkg)</option>
+          <option value="quizlet">Quizlet (.csv)</option>
+        </select>
+      </div>
+      <ImportField/>
     </div>
   );
 }
