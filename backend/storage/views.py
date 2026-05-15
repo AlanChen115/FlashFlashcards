@@ -11,14 +11,21 @@ def commit(request):
     flashcards = data.get('flashcards', [])
     language = data.get('language', 'Unknown')
 
+    if not flashcards:
+        return Response({"output": None, "error": "No flashcards provided"}, status=400)
+
     result = ingest_accepted_flashcards(flashcards, language)
 
-    return Response(result)
+    return Response({"output": result, "error": None})
 
 @api_view(['POST'])
 def similar(request):
     data = request.data
     flashcards = data.get('flashcards', [])
     language = data.get('language', 'Unknown')
+
+    if not flashcards:
+        return Response({"output": None, "error": "No flashcards provided"}, status=400)
+
     result = similar_check(flashcards, language)
-    return Response(result)
+    return Response({"output": result, "error": None})

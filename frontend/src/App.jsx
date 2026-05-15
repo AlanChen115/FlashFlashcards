@@ -179,10 +179,11 @@ function Flashcards({flashcards, setFlashcards, language}) {
     
     try {
       const response = await postJSON('/api/storage/similar/', { flashcards: cardsToCheck, language });
+      const checkedFlashcards = response.output.flashcards;
       
       setFlashcards((current) => {
         const updatedFlashcards = [...current];
-        response.flashcards.forEach((returnedCard, i) => {
+        checkedFlashcards.forEach((returnedCard, i) => {
           const originalIndex = indexes[i];
           updatedFlashcards[originalIndex] = {
             ...updatedFlashcards[originalIndex],
@@ -257,8 +258,9 @@ function App() {
   const handleGenerate = async (generatedFlashcards) => {
     try {
       const response = await postJSON('/api/storage/similar/', { flashcards: generatedFlashcards, language });
-        setFlashcards(response.flashcards);
-      console.log("Checked flashcards:", response.flashcards);
+      const checkedFlashcards = response.output.flashcards;
+      setFlashcards(checkedFlashcards);
+      console.log("Checked flashcards:", checkedFlashcards);
     } catch (err) {
       console.error("Error checking similar cards:", err);
     }
@@ -268,10 +270,13 @@ const handleDownload = async () => {
   if (!flashcards.length) return alert("No flashcards to download!");
 
   try {
+    const commitResponse = await postJSON("/api/storage/commit/", {flashcards: flashcards, language: language});
+    const acceptedFlashcards = commitResponse.output.flashcards;
+
     const response = await fetch("/api/exporter/"+ exportFormat + "/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ flashcards }),
+      body: JSON.stringify({ flashcards: acceptedFlashcards }),
     });
 
     if (!response.ok) throw new Error(`Request failed: ${response.status}`);

@@ -19,11 +19,18 @@ def get_card_lemma(card, language):
 def ingest_accepted_flashcards(flashcards, language):
     saved = []
     existing = []
+    accepted_flashcards = []
 
     for card in flashcards:
         front = card.get("front", "")
         back = card.get("back", "")
-        lemma = card.get("lemma", "")
+        lemma = get_card_lemma(card, language)
+        accepted_flashcards.append({
+            **card,
+            "front": front,
+            "back": back,
+            "lemma": lemma,
+        })
 
         content_hash = hashlib.sha256(
             f"{front}:{back}".encode()
@@ -45,7 +52,7 @@ def ingest_accepted_flashcards(flashcards, language):
             existing.append(str(obj.id))
 
     return {
-        "flashcards": flashcards,
+        "flashcards": accepted_flashcards,
         "saved_count": len(saved),
         "existing_count": len(existing),
     }
