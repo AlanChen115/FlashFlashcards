@@ -332,7 +332,6 @@ function ImportField() {
       <button onClick={handleAccept}>Accept Imported Flashcards</button>
     </div>
   )
-
 }
 
 function App() { 
@@ -351,38 +350,38 @@ function App() {
     }
   }
 
-const handleDownload = async () => {
-  if (!flashcards.length) return alert("No flashcards to download!");
+  const handleDownload = async () => {
+    if (!flashcards.length) return alert("No flashcards to download!");
 
-  try {
-    const commitResponse = await postJSON("/api/storage/commit/", {flashcards: flashcards, language: language});
-    const acceptedFlashcards = commitResponse.output.flashcards;
+    try {
+      const commitResponse = await postJSON("/api/storage/commit/", {flashcards: flashcards, language: language});
+      const acceptedFlashcards = commitResponse.output.flashcards;
 
-    const response = await fetch("/api/exporter/"+ exportFormat + "/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ flashcards: acceptedFlashcards }),
-    });
+      const response = await fetch("/api/exporter/"+ exportFormat + "/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ flashcards: acceptedFlashcards }),
+      });
 
-    setFlashcards([]); // Clear flashcards after export
+      setFlashcards([]); // Clear flashcards after export
 
-    if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+      if (!response.ok) throw new Error(`Request failed: ${response.status}`);
 
-    // Get file data as a blob
-    const blob = await response.blob();
+      // Get file data as a blob
+      const blob = await response.blob();
 
-    // Create a download link
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "flashcards.apkg"; // Matches your backend filename
-    a.click();
-    URL.revokeObjectURL(url);
-    } catch (err) {
-      alert("Export failed. Check console for details.");
+      // Create a download link
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "flashcards.apkg"; // Matches your backend filename
+      a.click();
+      URL.revokeObjectURL(url);
+      } catch (err) {
+        alert("Export failed. Check console for details.");
+      }
+
     }
-
-  }
 
   return (
     <div>
@@ -395,7 +394,12 @@ const handleDownload = async () => {
           <option value="quizlet">Quizlet (.csv)</option>
         </select>
       </div>
-      <ImportField/>
+      <div class="db-section">
+        <ImportField/>
+        <button onClick={() => {
+          postJSON("/api/storage/clear/", {});
+        }}>Clear Database</button>
+      </div>
     </div>
   );
 }

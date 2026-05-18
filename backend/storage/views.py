@@ -1,6 +1,6 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from storage.services import ingest_accepted_flashcards, similar_check
+from storage.services import ingest_accepted_flashcards, similar_check, clear_db
 from storage.importer import import_flashcard_file
 # Create your views here.
 @api_view(['POST'])
@@ -48,3 +48,8 @@ def import_flashcards(request):
   ## I don't know if I want to return all or just similar flashcards for confirmation.
     checked = similar_check(flashcards, language)
     return Response({"output": checked, "error": None})
+
+@api_view(['POST'])
+def clear(request):
+    result = clear_db()
+    return Response({"output": "All flashcards cleared", "error": None})

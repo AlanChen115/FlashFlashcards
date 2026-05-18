@@ -7,4 +7,5 @@ urlpatterns = [
     path('commit/', views.commit),
     path('similar/', views.similar),
     path('import/', views.import_flashcards),
+    path('clear/', views.clear),
 ]

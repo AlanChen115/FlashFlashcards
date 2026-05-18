@@ -96,3 +96,7 @@ def similar_check(flashcards, language):
     return {
         "flashcards": result,
     }
+
+def clear_db():
+    deleted_count, _ = Flashcard.objects.all().delete()[0]
+    return {"deleted_count": deleted_count}
