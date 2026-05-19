@@ -104,17 +104,21 @@ function Flashcards({ flashcards, setFlashcards, language }) {
               )}
             </div>
           )}
-          <button onClick={() => {
+          <button className="delete-button" aria-label="Delete flashcard" onClick={() => {
             const updatedFlashcards = flashcards.filter((_, i) => i !== index);
             setFlashcards(updatedFlashcards);
-          }}>Delete</button>
+          }}>
+            <span className="delete-icon" aria-hidden="true">×</span>
+          </button>
         </div>
       ))}
-      <button onClick={() => {
+      <button className="add-flashcard-button" aria-label="Add flashcard" onClick={() => {
         const updatedFlashcards = [...flashcards];
         updatedFlashcards.push({ front: '', back: '' });
         setFlashcards(updatedFlashcards);
-      }}>Add Flashcard</button>
+      }}>
+        <span className="add-flashcard-icon" aria-hidden="true">+</span>
+      </button>
       <button onClick={handleClearAll}>Clear All</button>
     </div>
   );

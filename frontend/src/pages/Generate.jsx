@@ -28,15 +28,19 @@ function LinkField({ links, setLinks }) {
             }}
             placeholder="Enter link"
           />
-          <button type="button" onClick={() => {
+          <button className="delete-button" type="button" aria-label="Delete link" onClick={() => {
             const updatedLinks = links.filter((_, i) => i !== index);
             setLinks(updatedLinks);
-          }}>Delete</button>
+          }}>
+            <span className="delete-icon" aria-hidden="true">×</span>
+          </button>
         </div>
       ))}
-      <button type="button" onClick={() => {
+      <button className="add-link-button" type="button" aria-label="Add link" onClick={() => {
         setLinks([...links, '']);
-      }}>Add Link</button>
+      }}>
+        <span className="add-link-icon" aria-hidden="true">+</span>
+      </button>
     </div>
   );
 }
