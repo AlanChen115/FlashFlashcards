@@ -73,53 +73,60 @@ function Flashcards({ flashcards, setFlashcards, language }) {
 
   return (
     <div className="flashcards-container">
-      {flashcards.map((card, index) => (
-        <div key={index} className="flashcard">
-          <input
-            type="text"
-            value={card.front}
-            onChange={(e) => handleChange(index, 'front', e.target.value)}
-          />
-          <input
-            type="text"
-            value={card.back}
-            onChange={(e) => handleChange(index, 'back', e.target.value)}
-          />
-          {card.similar && (
-            <div
-              className="similar-indicator"
-              onMouseEnter={() => setHoveredIndex(index)}
-              onMouseLeave={() => setHoveredIndex(null)}
-            >
-              Similar card found!
-              {hoveredIndex === index && (
-                <div className="similar-tooltip">
-                  <p className="similar-title">Similar cards:</p>
-                  {card.similar_cards.map((sim, i) => (
-                    <div key={i} className="similar-item">
-                      <strong>{sim.front}</strong> - {sim.back}
+      <div className="flashcards-grid">
+        {flashcards.map((card, index) => (
+          <div key={index} className="flashcard">
+            <div className="flashcard-info">
+              <input
+                type="text"
+                value={card.front}
+                onChange={(e) => handleChange(index, 'front', e.target.value)}
+              />
+              <input
+                type="text"
+                value={card.back}
+                onChange={(e) => handleChange(index, 'back', e.target.value)}
+              />
+              {card.similar && (
+                <div
+                  className="similar-indicator"
+                  onMouseEnter={() => setHoveredIndex(index)}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                >
+                  Similar card found!
+                  {hoveredIndex === index && (
+                    <div className="similar-tooltip">
+                      <p className="similar-title">Similar cards:</p>
+                      {card.similar_cards.map((sim, i) => (
+                        <div key={i} className="similar-item">
+                          <strong>{sim.front}</strong> - {sim.back}
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
                 </div>
               )}
             </div>
-          )}
-          <button className="delete-button" aria-label="Delete flashcard" onClick={() => {
-            const updatedFlashcards = flashcards.filter((_, i) => i !== index);
-            setFlashcards(updatedFlashcards);
-          }}>
-            <span className="delete-icon" aria-hidden="true">×</span>
-          </button>
-        </div>
-      ))}
-      <button className="add-flashcard-button" aria-label="Add flashcard" onClick={() => {
-        const updatedFlashcards = [...flashcards];
-        updatedFlashcards.push({ front: '', back: '' });
-        setFlashcards(updatedFlashcards);
-      }}>
-        <span className="add-flashcard-icon" aria-hidden="true">+</span>
-      </button>
-      <button onClick={handleClearAll}>Clear All</button>
+            <button className="delete-button" aria-label="Delete flashcard" onClick={() => {
+              const updatedFlashcards = flashcards.filter((_, i) => i !== index);
+              setFlashcards(updatedFlashcards);
+            }}>
+              <span className="delete-icon" aria-hidden="true">×</span>
+            </button>
+          </div>
+        ))}
+        <button className="flashcard-add-card" type="button" aria-label="Add flashcard" onClick={() => {
+          const updatedFlashcards = [...flashcards];
+          updatedFlashcards.push({ front: '', back: '' });
+          setFlashcards(updatedFlashcards);
+        }}>
+          <span className="add-flashcard-icon" aria-hidden="true">+</span>
+          <span>Add card</span>
+        </button>
+      </div>
+      {flashcards.length > 0 && (
+        <button className="clear-all-button" onClick={handleClearAll}>Clear All</button>
+      )}
     </div>
   );
 }

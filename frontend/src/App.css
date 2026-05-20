@@ -37,9 +37,11 @@
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
@@ -67,6 +69,167 @@
   color: #888;
 }
 
+button,
+input,
+select,
+textarea {
+  outline: none;
+}
+
+button:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+button:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+input:focus,
+textarea:focus,
+input:focus-visible,
+textarea:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+button:focus:not(:focus-visible),
+input:focus:not(:focus-visible),
+select:focus:not(:focus-visible),
+textarea:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+button:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #ffffff !important;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px #ffffff !important;
+}
+
+button::-moz-focus-inner {
+  border: 0;
+}
+
+button {
+  background: #413838;
+  color: #fff;
+  border: 1px solid #333;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+button:hover {
+  background: #695858;
+  border-color: #333;
+}
+
+button:focus-visible,
+button:active,
+button:active:focus,
+button:active:focus-visible,
+.add-flashcard-button:active,
+.open-form-button:active,
+.delete-button:active {
+  outline: none !important;
+  border-color: #ffffff !important;
+  box-shadow: 0 0 0 2px #ffffff !important;
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+.flashcards-container {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.flashcards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+@media (max-width: 900px) {
+  .flashcards-grid {
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .flashcards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.flashcards-container .flashcard,
+.flashcard-add-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 160px;
+  padding: 0.75rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.flashcards-container .flashcard {
+  margin-bottom: 0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  position: relative;
+}
+
+.flashcard-add-card {
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px dashed rgba(255, 255, 255, 0.3);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.flashcard-add-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.flashcard-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.flashcard-info input {
+  flex: 1;
+  min-height: 0;
+  border: none;
+  background: #282828;
+  color: #fff;
+  padding: 0.5rem;
+}
+
+.flashcards-container input {
+  border: none;
+  background: #282828;
+  color: #fff;
+  padding: 0.5rem;
+}
+
+.flashcards-container input:focus {
+  outline: none;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25);
+}
+
 .add-flashcard-button,
 .add-link-button,
 .delete-button {
@@ -79,6 +242,15 @@
   place-items: center;
 }
 
+.delete-button {
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: 1rem;
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+}
+
 .add-flashcard-icon,
 .add-link-icon {
   line-height: 0;
@@ -88,4 +260,47 @@
 .delete-icon {
   line-height: 0;
   transform: translateY(-2px);
+}
+
+.open-form-button {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: #ffffff;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  width: min(700px, 95%);
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.2);
+}
+
+.modal-close-button {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  border: none;
+  background: transparent;
+  font-size: 1.25rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0.25rem;
+}
+
+.modal-close-button:hover {
+  background: rgba(0, 0, 0, 0.08);
 }
