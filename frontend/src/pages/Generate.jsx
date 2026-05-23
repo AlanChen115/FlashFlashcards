@@ -17,29 +17,41 @@ function LinkField({ links, setLinks }) {
   }
 
   return (
-    <div>
+    <div className="link-field">
       {links.map((link, index) => (
-        <div key={index}>
+        <div key={index} className="link-row">
           <input
             type="text"
+            className="link-input"
             value={link}
             onChange={(e) => {
               handleChange(e, index);
             }}
-            placeholder="Enter link"
+            placeholder="https://example.com"
           />
-          <button className="delete-button" type="button" aria-label="Delete link" onClick={() => {
-            const updatedLinks = links.filter((_, i) => i !== index);
-            setLinks(updatedLinks);
-          }}>
+          <button
+            className="delete-button"
+            type="button"
+            aria-label="Delete link"
+            onClick={() => {
+              const updatedLinks = links.filter((_, i) => i !== index);
+              setLinks(updatedLinks);
+            }}
+          >
             <span className="delete-icon" aria-hidden="true">×</span>
           </button>
         </div>
       ))}
-      <button className="add-link-button" type="button" aria-label="Add link" onClick={() => {
-        setLinks([...links, '']);
-      }}>
+      <button
+        className="add-link-button"
+        type="button"
+        aria-label="Add link"
+        onClick={() => {
+          setLinks([...links, '']);
+        }}
+      >
         <span className="add-link-icon" aria-hidden="true">+</span>
+        Add another link
       </button>
     </div>
   );
@@ -49,7 +61,13 @@ function FileUpload({ setFile }) {
   const handleFileChange = (e) => setFile(e.target.files);
 
   return (
-    <input type="file" multiple onChange={handleFileChange} />
+    <div className="file-upload-wrapper">
+      <label className="file-upload-label">
+        <input className="file-upload-input" type="file" multiple onChange={handleFileChange} />
+        <span>Select images or documents</span>
+      </label>
+      <p className="upload-help">Upload JPG, PNG, or PDF files. You can select multiple files.</p>
+    </div>
   );
 }
 
@@ -101,19 +119,32 @@ function UnifiedForm({ onGenerate, language, setLanguage }) {
   };
 
   return (
-    <div>
+    <div className="modal-form">
       <form onSubmit={handleSubmit}>
-        <label>Select Language:</label>
-        <select value={language} onChange={(e) => setLanguage(e.target.value)}>
-          {languageOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-        <LinkField links={links} setLinks={setLinks} />
-        <FileUpload setFile={setFile} />
-        <button type="submit">Submit</button>
+        <div className="form-group">
+          <label>Select language</label>
+          <select value={language} onChange={(e) => setLanguage(e.target.value)}>
+            {languageOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="form-group">
+          <label>Website links</label>
+          <LinkField links={links} setLinks={setLinks} />
+        </div>
+
+        <div className="form-group">
+          <label>Upload files</label>
+          <FileUpload setFile={setFile} />
+        </div>
+
+        <div className="modal-actions">
+          <button type="submit" className="primary-button">Generate Flashcards</button>
+        </div>
       </form>
     </div>
   );
@@ -190,6 +221,10 @@ function Generate() {
             >
               ×
             </button>
+            <div className="modal-header">
+              <h2>Import content</h2>
+              <p>Upload files or add website links to generate flashcards automatically.</p>
+            </div>
             <UnifiedForm onGenerate={handleGenerate} language={language} setLanguage={setLanguage} />
           </div>
         </div>

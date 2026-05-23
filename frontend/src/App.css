@@ -231,7 +231,6 @@ button:active {
 }
 
 .add-flashcard-button,
-.add-link-button,
 .delete-button {
   width: 2rem;
   height: 2rem;
@@ -240,6 +239,18 @@ button:active {
   font-size: 1.25rem;
   display: inline-grid;
   place-items: center;
+}
+
+.link-row .delete-button {
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border-radius: 10px;
+  font-size: 1rem;
+  position: static;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .delete-button {
@@ -268,6 +279,141 @@ button:active {
   border-radius: 8px;
 }
 
+.modal-header {
+  text-align: left;
+  margin-bottom: 1.25rem;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.modal-header p {
+  margin: 0.75rem 0 0;
+  color: #c8c8d1;
+  line-height: 1.5;
+}
+
+.modal-form {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.form-group {
+  display: grid;
+  gap: 0.75rem;
+  text-align: left;
+  margin: 10px 0px;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #f3f3f8;
+}
+
+.modal select,
+.modal input[type="text"] {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #2f2d35;
+  color: #fff;
+  padding: 0.85rem 0.95rem;
+}
+
+.modal select {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, #fff 50%),
+    linear-gradient(135deg, #fff 50%, transparent 50%);
+  background-position: calc(100% - 1rem) calc(50% - 0.15rem), calc(100% - 0.65rem) calc(50% - 0.15rem);
+  background-size: 0.45rem 0.45rem, 0.45rem 0.45rem;
+  background-repeat: no-repeat;
+}
+
+.link-field {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.link-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.link-input {
+  flex: 1;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  padding: 0.85rem 0.95rem;
+}
+
+.file-upload-wrapper {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.file-upload-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.4rem;
+  border-radius: 14px;
+  padding: 0 1rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+}
+
+.file-upload-input {
+  display: none;
+}
+
+.upload-help {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.95rem;
+}
+
+.add-link-button,
+.primary-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  white-space: normal;
+}
+
+.add-link-button {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  min-width: 10rem;
+}
+
+.add-link-button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.primary-button {
+  background: #5c6ef8;
+  border-color: #4155d3;
+  color: #fff;
+}
+
+.primary-button:hover {
+  background: #495ad8;
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -279,7 +425,7 @@ button:active {
 }
 
 .modal {
-  background-color: #ffffff;
+  background-color: #4e3e3e;
   border-radius: 0.75rem;
   padding: 1.5rem;
   width: min(700px, 95%);
