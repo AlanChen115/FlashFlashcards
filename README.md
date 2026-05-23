@@ -1,262 +1,198 @@
 # FlashFlashcards
 
-FlashFlashcards is a **backend-first flashcard generation system** built with Django. The project focuses on the **end-to-end pipeline** for turning raw text (scraped or user-provided) into structured flashcards, with optional export to study tools such as Anki.
-
-At its current stage, the project intentionally prioritizes **backend correctness and data flow**. A frontend UI has **not yet been implemented** and the existing `frontend/` directory is only a placeholder.
+FlashFlashcards is a modern flashcard generation app built with a Django backend and a React frontend. It supports file upload, website parsing, AI-powered flashcard generation, similarity checking, and export-ready flashcards.
 
 ---
 
-## Project Status (Current)
+## What it does
 
-* ✅ Django backend scaffolded and running
-* ✅ Modular pipeline: **scraping → generation → export**
-* ✅ AI-driven flashcard generation (prompt-based)
-* ✅ Local pipeline testing via script
-* 🚧 Export layer (partial, extensible)
-* 🚧 Frontend UI (basic UI)
-* 🚧 Authentication, persistence, and user management (planned)
-
-This README documents **what is currently implemented**, with clearly marked limitations.
+* Upload images or documents and generate flashcards from the content
+* Add website links to extract text and convert it into flashcards
+* Save generated flashcards in a backend store
+* Detect similar cards using lemma-based matching
+* Export flashcards for study workflows
 
 ---
 
-## Tech Stack
+## Current status
+
+* ✅ Django backend with API endpoints
+* ✅ React frontend with upload/modal flow
+* ✅ File upload and link input support
+* ✅ Similar flashcard detection
+* ✅ Flashcard persistence via `storage` app
+* ✅ Working frontend build with Vite
+* 🚧 Export features and UX improvements ongoing
+* 🚧 Storage of Flashcards and interacting with your database
+* 🚧 Authentication and user accounts planned
+
+---
+
+## Tech stack
 
 ### Backend
 
-* **Python 3.11**
-* **Django**
-* **SQLite** (development)
-* Prompt-based AI generation (via `ai_generator`)
+* Python 3.11
+* Django 5.2.7
+* Django REST framework
+* SQLite for local development
 
 ### Frontend
 
-* React
+* React 19
+* Vite
+* React Router
 
 ---
 
-## High-Level Architecture
-
-The backend is organized as a **pipeline of loosely coupled Django apps**:
-
-1. **Scraper** — collects raw text from supported sources
-2. **AI Generator** — converts raw text into structured flashcards
-3. **Exporter** — prepares flashcards for external formats (e.g., Anki)
-
-Each stage can be tested independently or run end-to-end.
-
----
-
-## Repository Structure
+## Repository structure
 
 ```text
 FlashFlashcards/
 ├── backend/
-│   ├── manage.py
 │   ├── db.sqlite3
-│   ├── test_pipeline.py        # End-to-end local pipeline test
-│   │
-│   ├── Flashflashcards/        # Django project configuration
-│   │   ├── urls.py             # Root URL routing
-│   │   ├── views.py            # Project-level views (minimal)
+│   ├── manage.py
+│   ├── test_pipeline.py
+│   ├── Flashflashcards/
+│   │   ├── settings.py
+│   │   ├── urls.py
 │   │   └── wsgi.py
-│   │
-│   ├── scraper/                # Text acquisition layer
-│   │   ├── views.py            # Scraping API endpoints
-│   │   ├── urls.py
-│   │   └── utils.py            # Source-specific scraping logic
-│   │
-│   ├── ai_generator/           # Flashcard generation logic
-│   │   ├── views.py            # Generation endpoints
-│   │   ├── urls.py
-│   │   ├── utils.py            # Prompt handling + parsing
-│   │   └── prompts/            # Prompt templates
-│   │       └── japanese_flashcards.txt
-│   │
-│   └── exporter/               # Export layer (partial)
-│       ├── utils.py            # Export helpers
-│       └── models.py           # Placeholder / future expansion
-│
-├── frontend/                   # Basic react frontend
+│   ├── ai_generator/
+│   ├── exporter/
+│   ├── storage/
+│   └── requirements.txt
+├── frontend/
+│   ├── package.json
+│   ├── src/
+│   └── vite.config.js
 └── README.md
 ```
 
 ---
 
-## Backend Components
+## Core backend apps
 
-### 1. Scraper (`scraper` app)
+### `storage`
 
-**Purpose:**
+Handles flashcard persistence, deduplication, and similarity checks.
 
-* Retrieve raw text from supported sources
-* Normalize scraped content for downstream processing
+### `ai_generator`
 
-**Notes:**
+Parses uploaded files and website content, then converts raw text into structured flashcards using prompt-driven generation.
 
-* Scraping logic is source-specific and isolated in `utils.py`
-* Designed to be extended with additional sources
-* Output is plain text, not flashcards
+### `exporter`
 
----
-
-### 2. AI Generator (`ai_generator` app)
-
-**Purpose:**
-
-* Convert raw text into structured flashcards
-* Enforce learner-focused constraints via prompts
-
-**Key Features:**
-
-* Prompt templates stored in `prompts/`
-* Controlled output format for predictable parsing
-* Focus on learner-relevant vocabulary:
-
-  * verbs
-  * nouns
-  * adjectives (い / な)
-  * adverbs
-  * important proper nouns
-
-**Design Choice:**
-
-Prompt logic is kept separate from view logic to allow:
-
-* rapid iteration on prompts
-* future model or provider changes
+Prepares flashcards for export formats and future external study support.
 
 ---
 
-### 3. Exporter (`exporter` app)
+## Available API routes
 
-**Purpose:**
+The backend exposes multiple API namespaces under `/api/`:
 
-* Prepare generated flashcards for external formats
-
-**Current State:**
-
-* Export layer is **partially implemented**
-* Designed to support Anki (`.apkg`) and other formats
-* Logic is intentionally decoupled from generation
+* `/api/ai_generator/` — flashcard generation endpoints
+* `/api/storage/` — storage, similarity, and import endpoints
+* `/api/exporter/` — export-related endpoints
 
 ---
 
-## API Design Philosophy
+## Getting started
 
-* Backend-first, API-driven development
-* No frontend assumptions baked into endpoints
-* Focus on clarity and testability over completeness
+### Backend setup
 
-⚠️ API contracts are **not yet stable** and may change as development continues.
+1. Create and activate a virtual environment:
 
----
-
-## Running the Backend Locally
-
-### 1. Create and activate a virtual environment
-
-```bash
-python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-```
-
-### 2. Install dependencies
-
-This project does **not** currently ship with a `requirements.txt`. Based on the existing backend code, install the required packages manually:
-
-```bash
-pip install django djangorestframework selenium groq
-```
-
-> Note: Selenium also requires a compatible browser driver (e.g., ChromeDriver) installed and available on your system.
-
-### 3. Apply migrations
-
-```bash
+```powershell
 cd backend
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+2. Install backend dependencies:
+
+```powershell
+pip install -r requirements.txt
+```
+
+3. Run migrations:
+
+```powershell
 python manage.py migrate
 ```
 
-### 4. Run the development server
+4. Start the backend server:
 
-```bash
+```powershell
 python manage.py runserver
 ```
-
-Server will be available at:
-
-```
-http://127.0.0.1:8000/
 ```
 
-[http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+Server URL:
 
+```text
+http://127.0.0.1:8000
 ```
 
-Frontend Setup (Vite)
-1. Install frontend dependencies
+---
 
-```bash
-cd frontend
+### Frontend setup
+
+1. Install frontend dependencies:
+
+```powershell
+cd ../frontend
 npm install
 ```
 
-2. Start the development server
-```
+2. Start the development server:
+
+```powershell
 npm run dev
 ```
-
-Frontend will be available at:
 ```
-http://localhost:5173/
-````
 
-The frontend communicates with the Django backend via HTTP APIs.
-CORS configuration may be required depending on your setup.
----
+Access the frontend at:
 
-## Testing the Pipeline
-
-A basic end-to-end test is provided:
-
-```bash
-python backend/test_pipeline.py
-````
-
-This script exercises:
-
-* scraping
-* AI generation
-* export preparation
-
-without requiring a frontend or database setup beyond SQLite.
+```text
+http://localhost:5173
+```
 
 ---
 
-## Known Limitations
+## Testing
 
-* No frontend or user interface
-* No authentication or user accounts
-* No persistent deck management
-* Export functionality is incomplete
-* Error handling and validation are minimal
+Run the backend pipeline test:
 
-These limitations are intentional at this stage and reflect the project’s focus on backend pipeline development.
+```powershell
+cd backend
+python test_pipeline.py
+```
+
+This covers scraping, AI generation, and basic export preparation.
 
 ---
 
-## Roadmap (Indicative)
+## Notes
 
-* Frontend UI (likely React or similar)
-* User authentication and deck persistence
-* Full Anki `.apkg` export support
-* Improved API stability and documentation
-* Expanded scraping source support
+* The project uses a local SQLite database for development.
+* `storage` is registered in the Django app registry so flashcards and language metadata are persisted.
+* The frontend and backend are separate; ensure both are running when using the UI.
+
+---
+
+## Known limitations
+
+* No authentication or user accounts yet
+* Export/Anki integration is still partial
+* Error handling can be improved
+* Frontend UX may continue to evolve
 
 ---
 
 ## License
+
+This project is currently unlicensed. Add a license file if you want to make it open source.
+
 
 MIT License
 
