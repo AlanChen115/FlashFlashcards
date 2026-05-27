@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Flashcards from '../components/Flashcards';
 import {
   checkSimilarFlashcards,
@@ -57,16 +57,65 @@ function LinkField({ links, setLinks }) {
   );
 }
 
-function FileUpload({ setFile }) {
+function formatFileSize(bytes) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function FileUpload({ file, setFile }) {
+  const inputRef = useRef(null);
+  const selectedFiles = file ? Array.from(file) : [];
   const handleFileChange = (e) => setFile(e.target.files);
+
+  const handleRemoveFile = (fileIndex) => {
+    const updatedFiles = selectedFiles.filter((_, index) => index !== fileIndex);
+
+    if (!updatedFiles.length) {
+      if (inputRef.current) inputRef.current.value = '';
+      setFile(null);
+      return;
+    }
+
+    const dataTransfer = new DataTransfer();
+    updatedFiles.forEach((selectedFile) => dataTransfer.items.add(selectedFile));
+
+    if (inputRef.current) inputRef.current.files = dataTransfer.files;
+    setFile(dataTransfer.files);
+  };
 
   return (
     <div className="file-upload-wrapper">
       <label className="file-upload-label">
-        <input className="file-upload-input" type="file" multiple onChange={handleFileChange} />
+        <input ref={inputRef} className="file-upload-input" type="file" multiple onChange={handleFileChange} />
         <span>Select images or documents</span>
       </label>
       <p className="upload-help">Upload JPG, PNG, or PDF files. You can select multiple files.</p>
+      {selectedFiles.length > 0 && (
+        <div className="selected-files" aria-live="polite">
+          <p className="selected-files-title">
+            Selected {selectedFiles.length} {selectedFiles.length === 1 ? 'file' : 'files'}
+          </p>
+          <ul className="selected-files-list">
+            {selectedFiles.map((selectedFile, index) => (
+              <li key={`${selectedFile.name}-${selectedFile.lastModified}`} className="selected-file">
+                <span className="selected-file-details">
+                  <span className="selected-file-name">{selectedFile.name}</span>
+                  <span className="selected-file-size">{formatFileSize(selectedFile.size)}</span>
+                </span>
+                <button
+                  className="selected-file-remove"
+                  type="button"
+                  aria-label={`Remove ${selectedFile.name}`}
+                  onClick={() => handleRemoveFile(index)}
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
@@ -139,7 +188,7 @@ function UnifiedForm({ onGenerate, language, setLanguage }) {
 
         <div className="form-group">
           <label>Upload files</label>
-          <FileUpload setFile={setFile} />
+          <FileUpload file={file} setFile={setFile} />
         </div>
 
         <div className="modal-actions">

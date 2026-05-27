@@ -494,6 +494,64 @@ button:active {
   font-size: 0.95rem;
 }
 
+.selected-files {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.selected-files-title {
+  margin: 0;
+  color: #f3f3f8;
+  font-weight: 700;
+}
+
+.selected-files-list {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.selected-file {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.16);
+}
+
+.selected-file-details {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.selected-file-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selected-file-size {
+  flex: 0 0 auto;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.selected-file-remove {
+  flex: 0 0 auto;
+  padding: 0.35rem 0.55rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
 .add-link-button,
 .primary-button {
   display: inline-flex;
