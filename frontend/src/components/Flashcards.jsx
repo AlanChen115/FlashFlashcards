@@ -1,13 +1,23 @@
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { checkSimilarFlashcards } from '../services/api';
 
 function Flashcards({ flashcards, setFlashcards, language }) {
+  const nextCardKeyRef = useRef(0);
+  const cardKeysRef = useRef([]);
   const debounceRefs = useRef(null);
   const pendingCheckIndexes = useRef(new Set());
   const latestFlashcardsRef = useRef(flashcards);
-  const [hoveredIndex, setHoveredIndex] = useState(null);
 
   latestFlashcardsRef.current = flashcards;
+
+  while (cardKeysRef.current.length < flashcards.length) {
+    cardKeysRef.current.push(`flashcard-${nextCardKeyRef.current}`);
+    nextCardKeyRef.current += 1;
+  }
+
+  if (cardKeysRef.current.length > flashcards.length) {
+    cardKeysRef.current.length = flashcards.length;
+  }
 
   const handleChange = (index, field, value) => {
     pendingCheckIndexes.current.add(index);
@@ -68,14 +78,26 @@ function Flashcards({ flashcards, setFlashcards, language }) {
     const shouldClear = window.confirm('Clear all flashcards?');
     if (!shouldClear) return;
 
+    cardKeysRef.current = [];
     setFlashcards([]);
+  };
+
+  const handleDelete = (index) => {
+    cardKeysRef.current.splice(index, 1);
+    setFlashcards((current) => current.filter((_, i) => i !== index));
+  };
+
+  const handleAdd = () => {
+    cardKeysRef.current.push(`flashcard-${nextCardKeyRef.current}`);
+    nextCardKeyRef.current += 1;
+    setFlashcards((current) => [...current, { front: '', back: '' }]);
   };
 
   return (
     <div className="flashcards-container">
       <div className="flashcards-grid">
         {flashcards.map((card, index) => (
-          <div key={index} className="flashcard">
+          <div key={cardKeysRef.current[index]} className="flashcard">
             <div className="flashcard-info">
               <textarea
                 value={card.front}
@@ -98,38 +120,25 @@ function Flashcards({ flashcards, setFlashcards, language }) {
                 placeholder="Back of card"
               />
               {card.similar && (
-                <div
-                  className="similar-indicator"
-                  onMouseEnter={() => setHoveredIndex(index)}
-                  onMouseLeave={() => setHoveredIndex(null)}
-                >
+                <div className="similar-indicator" tabIndex={0}>
                   Similar card found!
-                  {hoveredIndex === index && (
-                    <div className="similar-tooltip">
-                      <p className="similar-title">Similar cards:</p>
-                      {card.similar_cards.map((sim, i) => (
-                        <div key={i} className="similar-item">
-                          <strong>{sim.front}</strong> - {sim.back}
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  <div className="similar-tooltip" role="tooltip">
+                    <p className="similar-title">Similar cards:</p>
+                    {card.similar_cards?.map((sim, i) => (
+                      <div key={i} className="similar-item">
+                        <strong>{sim.front}</strong> - {sim.back}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
-            <button className="delete-button" aria-label="Delete flashcard" onClick={() => {
-              const updatedFlashcards = flashcards.filter((_, i) => i !== index);
-              setFlashcards(updatedFlashcards);
-            }}>
+            <button className="delete-button" aria-label="Delete flashcard" onClick={() => handleDelete(index)}>
               <span className="delete-icon" aria-hidden="true">×</span>
             </button>
           </div>
         ))}
-        <button className="flashcard-add-card" type="button" aria-label="Add flashcard" onClick={() => {
-          const updatedFlashcards = [...flashcards];
-          updatedFlashcards.push({ front: '', back: '' });
-          setFlashcards(updatedFlashcards);
-        }}>
+        <button className="flashcard-add-card" type="button" aria-label="Add flashcard" onClick={handleAdd}>
           <span className="add-flashcard-icon" aria-hidden="true">+</span>
           <span>Add card</span>
         </button>
