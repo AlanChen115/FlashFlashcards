@@ -146,28 +146,33 @@ button:active {
 }
 
 .flashcards-container {
+  --flashcard-max-width: 320px;
+  --flashcard-gap: 1rem;
+  --flashcards-column-count: 1;
+  --flashcards-grid-width: calc(
+    (var(--flashcards-column-count) * var(--flashcard-max-width)) +
+    ((var(--flashcards-column-count) - 1) * var(--flashcard-gap))
+  );
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 12px;
   padding: 1rem;
   background: rgba(255, 255, 255, 0.03);
+  width: calc(var(--flashcards-grid-width) + 2rem);
+  max-width: 100%;
+  margin-inline: auto;
+  box-sizing: border-box;
+  overflow: visible;
 }
 
 .flashcards-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(240px, 1fr));
-  gap: 1rem;
-}
-
-@media (max-width: 900px) {
-  .flashcards-grid {
-    grid-template-columns: repeat(2, minmax(220px, 1fr));
-  }
-}
-
-@media (max-width: 600px) {
-  .flashcards-grid {
-    grid-template-columns: 1fr;
-  }
+  grid-template-columns: repeat(var(--flashcards-column-count), minmax(0, var(--flashcard-max-width)));
+  gap: var(--flashcard-gap);
+  align-items: start;
+  justify-content: start;
+  width: min(100%, var(--flashcards-grid-width));
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .flashcards-container .flashcard,
@@ -175,7 +180,7 @@ button:active {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 160px;
+  min-height: 0;
   padding: 0.75rem;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.02);
@@ -185,6 +190,42 @@ button:active {
   margin-bottom: 0;
   border: 1px solid rgba(255, 255, 255, 0.12);
   position: relative;
+  align-items: stretch;
+}
+
+@media (min-width: 704px) {
+  .flashcards-container:has(.flashcards-grid > :nth-child(2)) {
+    --flashcards-column-count: 2;
+  }
+}
+
+@media (min-width: 1040px) {
+  .flashcards-container:has(.flashcards-grid > :nth-child(3)) {
+    --flashcards-column-count: 3;
+  }
+}
+
+@media (min-width: 1376px) {
+  .flashcards-container:has(.flashcards-grid > :nth-child(4)) {
+    --flashcards-column-count: 4;
+  }
+}
+
+@media (min-width: 1712px) {
+  .flashcards-container:has(.flashcards-grid > :nth-child(5)) {
+    --flashcards-column-count: 5;
+  }
+}
+
+@media (max-width: 700px) {
+  .flashcards-container {
+    width: 100%;
+    margin-inline: 0;
+  }
+
+  .flashcards-grid {
+    width: 100%;
+  }
 }
 
 .flashcard-add-card {
@@ -218,14 +259,29 @@ button:active {
   padding: 0.5rem;
 }
 
-.flashcards-container input {
+.flashcards-container input,
+.flashcards-container textarea {
   border: none;
   background: #282828;
   color: #fff;
-  padding: 0.5rem;
+  padding: 0.75rem;
+  border-radius: 10px;
+  resize: vertical;
+  min-height: 4rem;
+  box-sizing: border-box;
 }
 
-.flashcards-container input:focus {
+.flashcards-container textarea {
+  width: 100%;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  line-height: 1.4;
+  max-height: 18rem;
+}
+
+.flashcards-container input:focus,
+.flashcards-container textarea:focus {
   outline: none;
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25);
 }

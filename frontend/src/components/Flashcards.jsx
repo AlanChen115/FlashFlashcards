@@ -77,15 +77,25 @@ function Flashcards({ flashcards, setFlashcards, language }) {
         {flashcards.map((card, index) => (
           <div key={index} className="flashcard">
             <div className="flashcard-info">
-              <input
-                type="text"
+              <textarea
                 value={card.front}
+                rows={2}
                 onChange={(e) => handleChange(index, 'front', e.target.value)}
+                onInput={(e) => {
+                  e.target.style.height = 'auto';
+                  e.target.style.height = `${e.target.scrollHeight}px`;
+                }}
+                placeholder="Front of card"
               />
-              <input
-                type="text"
+              <textarea
                 value={card.back}
+                rows={3}
                 onChange={(e) => handleChange(index, 'back', e.target.value)}
+                onInput={(e) => {
+                  e.target.style.height = 'auto';
+                  e.target.style.height = `${e.target.scrollHeight}px`;
+                }}
+                placeholder="Back of card"
               />
               {card.similar && (
                 <div
