@@ -19,6 +19,25 @@ export async function postJSON(path, body) {
   }
 }
 
+export async function getJSON(path, params = {}) {
+  const searchParams = new URLSearchParams();
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      searchParams.append(key, value);
+    }
+  });
+
+  const queryString = searchParams.toString();
+  const response = await fetch(`${API_BASE}${path}${queryString ? `?${queryString}` : ""}`);
+
+  if (!response.ok) {
+    throw new Error(`Request failed: ${response.status}`);
+  }
+
+  return await response.json();
+}
+
 export function createFileFormData(files, fields = {}) {
   const formData = new FormData();
 
@@ -68,6 +87,22 @@ export function importFlashcards(formData) {
 
 export function clearFlashcardsDatabase() {
   return postJSON("/storage/clear/", {});
+}
+
+export function removeFlashcard(flashcards, language) {
+  return postJSON("/storage/remove/", { flashcards, language });
+}
+
+export function getAllFlashcards() {
+  return getJSON("/storage/list/");
+}
+
+export function searchFlashcards(query, language) {
+  return getJSON("/storage/search/", { q: query, language });
+}
+
+export function updateFlashcard(flashcard) {
+  return postJSON("/storage/update/", flashcard);
 }
 
 export async function exportFlashcards(flashcards, exportFormat) {
