@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import Flashcards from '../components/Flashcards';
+import FlashcardsContainer from '../components/FlashcardsContainer';
 import {
   checkSimilarFlashcards,
   commitFlashcards,
@@ -162,7 +162,7 @@ function UnifiedForm({ onGenerate, language, setLanguage }) {
 
       console.log('Generated flashcards:', allFlashcards);
       onGenerate(allFlashcards);
-    } catch (err) {
+    } catch {
       alert('Check console for details.');
     }
   };
@@ -216,7 +216,7 @@ function DownloadForm({ flashcards, language, exportFormat, setExportFormat, set
       a.download = exportFormat === 'quizlet' ? 'flashcards.csv' : 'flashcards.apkg';
       a.click();
       URL.revokeObjectURL(url);
-    } catch (err) {
+    } catch {
       alert('Export failed. Check console for details.');
     }
   };
@@ -279,7 +279,7 @@ function Generate() {
         </div>
       )}
 
-      <Flashcards flashcards={flashcards} setFlashcards={setFlashcards} language={language} />
+      <FlashcardsContainer flashcards={flashcards} setFlashcards={setFlashcards} language={language} />
       {flashcards.length > 0 && (
         <DownloadForm
           flashcards={flashcards}

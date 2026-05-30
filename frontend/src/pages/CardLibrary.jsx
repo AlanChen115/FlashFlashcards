@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Flashcards from '../components/Flashcards';
+import FlashcardsContainer from '../components/FlashcardsContainer';
 import {
   clearFlashcardsDatabase,
   commitFlashcards,
@@ -65,7 +65,7 @@ function ImportField() {
       </select>
       <ImportForm onImport={handleImport} language={language} />
       <h2>Imported Flashcards</h2>
-      <Flashcards flashcards={importedFlashcards} setFlashcards={setImportedFlashcards} language={language} />
+      <FlashcardsContainer flashcards={importedFlashcards} setFlashcards={setImportedFlashcards} language={language} />
       <button onClick={handleAccept}>Accept Imported Flashcards</button>
     </div>
   );

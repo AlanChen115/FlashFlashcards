@@ -1,23 +1,42 @@
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { checkSimilarFlashcards } from '../services/api';
+import Flashcard from './Flashcard';
 
-function Flashcards({ flashcards, setFlashcards, language }) {
-  const nextCardKeyRef = useRef(0);
-  const cardKeysRef = useRef([]);
+function FlashcardsContainer({ flashcards, setFlashcards, language }) {
+  const nextCardKeyRef = useRef(flashcards.length);
   const debounceRefs = useRef(null);
   const pendingCheckIndexes = useRef(new Set());
   const latestFlashcardsRef = useRef(flashcards);
+  const [cardKeys, setCardKeys] = useState(() =>
+    flashcards.map((_, index) => `flashcard-${index}`),
+  );
 
-  latestFlashcardsRef.current = flashcards;
+  useEffect(() => {
+    latestFlashcardsRef.current = flashcards;
+  }, [flashcards]);
 
-  while (cardKeysRef.current.length < flashcards.length) {
-    cardKeysRef.current.push(`flashcard-${nextCardKeyRef.current}`);
-    nextCardKeyRef.current += 1;
-  }
+  useEffect(() => {
+    setCardKeys((currentKeys) => {
+      if (currentKeys.length === flashcards.length) return currentKeys;
 
-  if (cardKeysRef.current.length > flashcards.length) {
-    cardKeysRef.current.length = flashcards.length;
-  }
+      if (currentKeys.length > flashcards.length) {
+        return currentKeys.slice(0, flashcards.length);
+      }
+
+      const addedKeys = Array.from({ length: flashcards.length - currentKeys.length }, () => {
+        const key = `flashcard-${nextCardKeyRef.current}`;
+        nextCardKeyRef.current += 1;
+        return key;
+      });
+      return [...currentKeys, ...addedKeys];
+    });
+  }, [flashcards.length]);
+
+  useEffect(() => () => {
+    if (debounceRefs.current) {
+      clearTimeout(debounceRefs.current);
+    }
+  }, []);
 
   const handleChange = (index, field, value) => {
     pendingCheckIndexes.current.add(index);
@@ -78,18 +97,19 @@ function Flashcards({ flashcards, setFlashcards, language }) {
     const shouldClear = window.confirm('Clear all flashcards?');
     if (!shouldClear) return;
 
-    cardKeysRef.current = [];
+    setCardKeys([]);
     setFlashcards([]);
   };
 
   const handleDelete = (index) => {
-    cardKeysRef.current.splice(index, 1);
+    setCardKeys((currentKeys) => currentKeys.filter((_, i) => i !== index));
     setFlashcards((current) => current.filter((_, i) => i !== index));
   };
 
   const handleAdd = () => {
-    cardKeysRef.current.push(`flashcard-${nextCardKeyRef.current}`);
+    const nextCardKey = `flashcard-${nextCardKeyRef.current}`;
     nextCardKeyRef.current += 1;
+    setCardKeys((currentKeys) => [...currentKeys, nextCardKey]);
     setFlashcards((current) => [...current, { front: '', back: '' }]);
   };
 
@@ -97,46 +117,13 @@ function Flashcards({ flashcards, setFlashcards, language }) {
     <div className="flashcards-container">
       <div className="flashcards-grid">
         {flashcards.map((card, index) => (
-          <div key={cardKeysRef.current[index]} className="flashcard">
-            <div className="flashcard-info">
-              <textarea
-                value={card.front}
-                rows={2}
-                onChange={(e) => handleChange(index, 'front', e.target.value)}
-                onInput={(e) => {
-                  e.target.style.height = 'auto';
-                  e.target.style.height = `${e.target.scrollHeight}px`;
-                }}
-                placeholder="Front of card"
-              />
-              <textarea
-                value={card.back}
-                rows={3}
-                onChange={(e) => handleChange(index, 'back', e.target.value)}
-                onInput={(e) => {
-                  e.target.style.height = 'auto';
-                  e.target.style.height = `${e.target.scrollHeight}px`;
-                }}
-                placeholder="Back of card"
-              />
-              {card.similar && (
-                <div className="similar-indicator" tabIndex={0}>
-                  Similar card found!
-                  <div className="similar-tooltip" role="tooltip">
-                    <p className="similar-title">Similar cards:</p>
-                    {card.similar_cards?.map((sim, i) => (
-                      <div key={i} className="similar-item">
-                        <strong>{sim.front}</strong> - {sim.back}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-            <button className="delete-button" aria-label="Delete flashcard" onClick={() => handleDelete(index)}>
-              <span className="delete-icon" aria-hidden="true">×</span>
-            </button>
-          </div>
+          <Flashcard
+            key={cardKeys[index] ?? `flashcard-fallback-${index}`}
+            card={card}
+            index={index}
+            onChange={handleChange}
+            onDelete={handleDelete}
+          />
         ))}
         <button className="flashcard-add-card" type="button" aria-label="Add flashcard" onClick={handleAdd}>
           <span className="add-flashcard-icon" aria-hidden="true">+</span>
@@ -150,4 +137,4 @@ function Flashcards({ flashcards, setFlashcards, language }) {
   );
 }
 
-export default Flashcards;
+export default FlashcardsContainer;
