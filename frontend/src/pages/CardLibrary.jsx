@@ -1,85 +1,93 @@
 import { useState } from 'react';
 import FlashcardsContainer from '../components/FlashcardsContainer';
+import UnifiedForm from '../components/UnifiedForm';
 import {
   clearFlashcardsDatabase,
   commitFlashcards,
-  createFileFormData,
-  importFlashcards,
 } from '../services/api';
 
-function ImportForm({ onImport, language }) {
-  const [file, setFile] = useState(null);
-
-  const handleFileChange = (e) => {
-    setFile(e.target.files);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!file) return alert('Please select a file to import.');
-
-    const formData = createFileFormData(file, { language });
-    const response = await importFlashcards(formData);
-
-    onImport(response.output.flashcards);
-  };
-
-  return (
-    <div>
-      <form onSubmit={handleSubmit}>
-        <input type="file" multiple accept=".apkg,.csv" onChange={handleFileChange} />
-        <button type="submit">Import</button>
-      </form>
-    </div>
-  );
-}
-
-function ImportField() {
+function CardLibrary() {
   const [importedFlashcards, setImportedFlashcards] = useState([]);
   const [language, setLanguage] = useState('Japanese');
-  const languageOptions = [
-    { value: 'Japanese', label: 'Japanese' },
-    { value: 'Chinese', label: 'Chinese' },
-    { value: 'Spanish', label: 'Spanish' },
-    { value: 'Korean', label: 'Korean' },
-  ];
+  const [showForm, setShowForm] = useState(false);
 
   const handleImport = (cards) => {
     setImportedFlashcards(cards);
+    setShowForm(false);
   };
 
   const handleAccept = async () => {
-    await commitFlashcards(importedFlashcards, language);
-    setImportedFlashcards([]);
+    if (!importedFlashcards.length) return alert('No imported flashcards to accept.');
+
+    try {
+      await commitFlashcards(importedFlashcards, language);
+      setImportedFlashcards([]);
+    } catch (err) {
+      console.error('Error accepting imported cards:', err);
+      alert('Import failed. Check console for details.');
+    }
   };
 
-  return (
-    <div>
-      <label>Import Language:</label>
-      <select value={language} onChange={(e) => setLanguage(e.target.value)}>
-        {languageOptions.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-      <ImportForm onImport={handleImport} language={language} />
-      <h2>Imported Flashcards</h2>
-      <FlashcardsContainer flashcards={importedFlashcards} setFlashcards={setImportedFlashcards} language={language} />
-      <button onClick={handleAccept}>Accept Imported Flashcards</button>
-    </div>
-  );
-}
+  const closeForm = () => setShowForm(false);
 
-function CardLibrary() {
   return (
     <div>
       <h1>Card Library</h1>
+
+      <button type="button" className="open-form-button" onClick={() => setShowForm(true)}>
+        Import Flashcards
+      </button>
+
+      {showForm && (
+        <div className="modal-overlay" onClick={closeForm}>
+          <div className="modal" onClick={(event) => event.stopPropagation()}>
+            <button
+              type="button"
+              aria-label="Close form"
+              className="modal-close-button"
+              onClick={closeForm}
+            >
+              X
+            </button>
+            <div className="modal-header">
+              <h2>Import flashcards</h2>
+              <p>Upload an Anki or CSV file to preview before adding it to your library.</p>
+            </div>
+            <UnifiedForm
+              onGenerate={handleImport}
+              language={language}
+              setLanguage={setLanguage}
+              showLinks={false}
+              mode="import"
+              submitLabel="Import"
+              fileAccept=".apkg,.csv"
+              fileHelpText="Upload APKG or CSV files. You can select multiple files."
+              fileLabel="Select flashcard files"
+            />
+          </div>
+        </div>
+      )}
+
       <div className="db-section">
-        <ImportField />
-        <button onClick={() => {
-          clearFlashcardsDatabase();
-        }}>Clear Database</button>
+        <h2>Imported Flashcards</h2>
+        <FlashcardsContainer
+          flashcards={importedFlashcards}
+          setFlashcards={setImportedFlashcards}
+          language={language}
+        />
+        {importedFlashcards.length > 0 && (
+          <button type="button" onClick={handleAccept}>
+            Accept Imported Flashcards
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={() => {
+            clearFlashcardsDatabase();
+          }}
+        >
+          Clear Database
+        </button>
       </div>
     </div>
   );
